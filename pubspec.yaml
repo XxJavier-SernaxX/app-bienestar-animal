@@ -1,0 +1,44 @@
+# 🐷 Proyecto Flutter para tu app de Bienestar Animal
+# Aquí le cambiamos el nombre oficial del proyecto a "SIBA"
+
+name: siba                  # 👈 Nuevo nombre del proyecto
+description: Aplicación móvil para evaluación del bienestar animal.
+publish_to: 'none'          # 👈 Esto evita que se publique en línea (solo local)
+version: 1.0.0+1            # 👈 Versión de la app (puedes cambiarla en el futuro)
+
+# 🔧 Versión del SDK de Dart compatible con tu proyecto
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+# 📦 DEPENDENCIAS: librerías necesarias para tu app
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2          # Íconos estilo iOS
+  shared_preferences: ^2.2.3       # Guardar datos simples en el teléfono
+  sqflite: ^2.0.0+4                # Base de datos local (SQLite)
+  path_provider: ^2.0.11           # Buscar carpetas del sistema
+  path: ^1.8.2                     # Manejar rutas de archivos
+  image_picker: ^1.0.4             # Elegir o tomar fotos
+  url_launcher: ^6.1.10            # Abrir enlaces o apps externas
+
+# 🧪 DEPENDENCIAS DE DESARROLLO: pruebas y reglas de código
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.14.4   # 👈 Agregamos esta línea (la más importante)
+
+# 🎨 SECCIÓN FLUTTER: configuración visual y recursos
+flutter:
+  uses-material-design: true       # Activa el diseño Material Design
+
+  # 📁 Aquí se declaran las imágenes o recursos que usas
+  assets:
+    - assets/icono.png             # Tu logo del cerdito con la gallina 🐷🐔
+
+# 🧩 CONFIGURACIÓN DEL ÍCONO DE LA APP
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icono.png"
