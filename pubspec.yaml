@@ -20,7 +20,7 @@ dependencies:
   path_provider: ^2.0.11           # Buscar carpetas del sistema
   path: ^1.8.2                     # Manejar rutas de archivos
   image_picker: ^1.0.4             # Elegir o tomar fotos
-  url_launcher: ^6.1.10            # Abrir enlaces o apps externas
+  url_launcher: ^6.1.10     
 
 # 🧪 DEPENDENCIAS DE DESARROLLO: pruebas y reglas de código
 dev_dependencies:
@@ -35,8 +35,8 @@ flutter:
 
   # 📁 Aquí se declaran las imágenes o recursos que usas
   assets:
-    - assets/icono.png             # Tu logo del cerdito con la gallina 🐷🐔
-
+    - assets/icono.png      # Tu logo del cerdito con la gallina 🐷🐔
+    - assets/porcino1.jpg       
 # 🧩 CONFIGURACIÓN DEL ÍCONO DE LA APP
 flutter_launcher_icons:
   android: true

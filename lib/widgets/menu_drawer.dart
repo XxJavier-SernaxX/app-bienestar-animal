@@ -46,7 +46,7 @@ class MenuDrawer extends StatelessWidget {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Metodología ICA - Versión 3.0',
+                    'Metodología ICA - Versión 1.0',
                     style: TextStyle(color: Colors.white70),
                   ),
                 ],

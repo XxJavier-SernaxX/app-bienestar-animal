@@ -19,7 +19,8 @@ class SpeciesSelectionPage extends StatelessWidget {
       future: _getUserData(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
 
         final user = snapshot.data!;
@@ -33,7 +34,8 @@ class SpeciesSelectionPage extends StatelessWidget {
                 Text(
                   "Evaluador: ${user['name']}\nFecha: ${user['date']?.split('T').first}",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton.icon(
@@ -48,12 +50,57 @@ class SpeciesSelectionPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) => Scaffold(
-                          appBar: AppBar(title: const Text("Bienestar Porcino")),
+                          appBar:
+                              AppBar(title: const Text("Bienestar Porcino")),
                           drawer: MenuDrawer(species: 'Porcinos'),
-                          body: const Center(
-                            child: Text(
-                              "Usa el menú ☰ para navegar por los pasos de la metodología",
-                              textAlign: TextAlign.center,
+                          body: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Imagen superior
+                                Image.asset(
+                                  'assets/porcino1.jpg',
+                                  fit: BoxFit.cover,
+                                  height: 230,
+                                ),
+                                const SizedBox(height: 20),
+
+                                // Texto explicativo y didáctico
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: Column(
+                                    children: const [
+                                      Text(
+                                        "Bienvenido al módulo de Bienestar Porcino 🐷",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        "Usa el menú ☰ para explorar los pasos de la metodología. "
+                                        "Aquí podrás evaluar las condiciones de bienestar animal, "
+                                        "analizar resultados y registrar observaciones importantes.",
+                                        style: TextStyle(
+                                            fontSize: 16, height: 1.4),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        "Recuerda que cada sección incluye indicadores clave sobre "
+                                        "alimentación, manejo, salud y comportamiento. ¡Explora, aprende y evalúa!",
+                                        style: TextStyle(
+                                            fontSize: 16, height: 1.4),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -64,14 +111,16 @@ class SpeciesSelectionPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.egg, size: 40),
-                  label: const Text("Aves de Postura", style: TextStyle(fontSize: 20)),
+                  label: const Text("Aves de Postura",
+                      style: TextStyle(fontSize: 20)),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 60),
                     backgroundColor: Colors.orange,
                   ),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Módulo de Aves en desarrollo 🐔")),
+                      const SnackBar(
+                          content: Text("Módulo de Aves en desarrollo 🐔")),
                     );
                   },
                 ),
