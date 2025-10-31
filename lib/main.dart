@@ -1,15 +1,32 @@
-import 'package:flutter/material.dart';
+// ✅ main.dart – Archivo principal de SIBA
+// -------------------------------------------------------
+// Explicación tipo estudiante:
+// Este archivo es como el “cerebro inicial” de la app.
+// Aquí se configura Firebase, el estilo visual y todas las rutas.
+// También dice cuál pantalla se abre primero (login).
 
-// 🔹 Importa tus pantallas
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+// 🔹 Archivo de configuración de Firebase
+import 'firebase_options.dart';
+
+// 🔹 Pantallas
 import 'screens/login_page.dart';
 import 'screens/species_selection.dart';
 import 'screens/survey_page.dart';
 import 'screens/indicator_list.dart';
 import 'screens/indicator_detail.dart';
-import 'screens/resultados_screen.dart'; // <-- la nueva pantalla de resultados
-import 'widgets/menu_drawer.dart';
+import 'screens/resultados_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Inicializar Firebase ANTES de arrancar la app
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const BienestarApp());
 }
 
@@ -19,37 +36,50 @@ class BienestarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Metodología Bienestar Animal',
+      title: 'SIBA - Bienestar Animal',
       debugShowCheckedModeBanner: false,
+
+      // ✅ Tema general de la app
       theme: ThemeData(
         primarySwatch: Colors.teal,
         useMaterial3: true,
       ),
 
-      // 🔹 Ruta inicial
+      // ✅ Pantalla inicial
       initialRoute: '/login',
 
-      // 🔹 Define todas las rutas disponibles
+      // ✅ Rutas de la aplicación
       routes: {
         '/login': (context) => const LoginPage(),
+
         '/species': (context) => const SpeciesSelectionPage(),
 
-        // Encuestas específicas
-        '/porcinos': (context) =>
-            SurveyPage(indicator: {'id': 'porcinos', 'title': 'Porcinos'}),
-        '/aves': (context) =>
-            SurveyPage(indicator: {'id': 'aves', 'title': 'Aves de postura'}),
+        // ✅ Encuestas
+        '/porcinos': (context) => SurveyPage(
+              indicator: {'id': 'porcinos', 'title': 'Porcinos'},
+            ),
 
-        // Lista e indicadores
-        '/indicators': (context) =>
-            const IndicatorList(category: 'recursos', categoryTitle: 'Recursos', species: 'porcinos'),
-        '/indicator_detail': (context) => const IndicatorDetail(
-              indicatorName: 'Condición corporal',
+        '/aves': (context) => SurveyPage(
+              indicator: {'id': 'aves', 'title': 'Aves de postura'},
+            ),
+
+        // ✅ Lista de indicadores (por defecto recursos para porcinos)
+        '/indicators': (context) => IndicatorList(
+              category: 'recursos',
+              categoryTitle: 'Recursos',
+              species: 'porcinos',
+            ),
+
+        // ✅ Detalle de indicador
+        '/indicator_detail': (context) => IndicatorDetail(
+              indicatorName: 'Condición Corporal',
               category: 'animal',
             ),
 
-        // Resultados finales
-        '/resultados': (context) => ResultadosScreen(),
+        // ✅ Resultados finales
+        '/resultados': (context) => const ResultadosScreen(
+              species: 'porcinos',
+            ),
       },
     );
   }

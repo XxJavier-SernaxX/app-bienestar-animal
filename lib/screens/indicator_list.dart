@@ -1,6 +1,16 @@
-// lib/screens/indicator_list.dart
+// ✅ Pantalla moderna para mostrar la lista de indicadores (versión final SIBA)
+// ----------------------------------------------------------------------------
+// Esta versión mantiene tu diseño moderno PERO ahora sí guarda correctamente
+// el progreso en SharedPreferences usando las llaves creadas en IndicatorDetail.
+//
+// Explicación corta:
+// - Los indicadores marcados quedan guardados.
+// - Cuando vuelves a entrar ya aparecen marcados.
+// - Se lee directamente lo que guardó IndicatorDetail.
+// - El diseño sigue igual de elegante que el que te gustó.
+
 import 'package:flutter/material.dart';
-import '../utils/storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'indicator_detail.dart';
 
 class IndicatorList extends StatefulWidget {
@@ -20,7 +30,7 @@ class IndicatorList extends StatefulWidget {
 }
 
 class _IndicatorListState extends State<IndicatorList> {
-  // Mapa de indicadores por categoría
+  // ✅ Indicadores por categoría
   final Map<String, List<String>> indicators = {
     'recursos': [
       'Estado de los Comederos',
@@ -77,25 +87,32 @@ class _IndicatorListState extends State<IndicatorList> {
     ],
   };
 
-  // Para marcar los indicadores hechos
+  // ✅ Estado de los indicadores completados
   Map<String, bool> doneStatus = {};
 
   @override
   void initState() {
     super.initState();
-    _loadDoneStatus();
+    _loadFromPreferences();
   }
 
-  Future<void> _loadDoneStatus() async {
-    final saved = await StorageHelper.getResults();
-    setState(() {
-      for (var result in saved) {
-        doneStatus[result['indicador']] = true;
-      }
-    });
+  // ✅ Carga desde SharedPreferences lo que ya está hecho
+  Future<void> _loadFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    Map<String, bool> temp = {};
+
+    for (String ind in indicators[widget.category]!) {
+      final key = "${widget.category}_$ind";
+      final exist = prefs.getString(key); // Si existe → ya tiene resultado
+      temp[ind] = (exist != null);
+    }
+
+    setState(() => doneStatus = temp);
   }
 
-  Future<void> _markAsDone(String indicatorName) async {
+  // ✅ Animación cuando el usuario marca/desmarca manualmente
+  void _toggleDone(String indicatorName) {
     setState(() {
       doneStatus[indicatorName] = !(doneStatus[indicatorName] ?? false);
     });
@@ -103,49 +120,92 @@ class _IndicatorListState extends State<IndicatorList> {
 
   @override
   Widget build(BuildContext context) {
-    final items = indicators[widget.category] ?? [];
+    final items = indicators[widget.category]!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoryTitle),
+        backgroundColor: Colors.teal,
+        elevation: 3,
+        title: Text(
+          widget.categoryTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
+
       body: ListView.builder(
+        padding: const EdgeInsets.all(12),
         itemCount: items.length,
         itemBuilder: (context, index) {
-          final item = items[index];
-          final isDone = doneStatus[item] ?? false;
+          final indicator = items[index];
+          final isDone = doneStatus[indicator] ?? false;
 
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            child: ListTile(
-              leading: Checkbox(
-                value: isDone,
-                onChanged: (val) {
-                  _markAsDone(item);
-                },
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 280),
+            child: Card(
+              elevation: 4,
+              margin: const EdgeInsets.symmetric(vertical: 7),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
               ),
-              title: Text(item),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => IndicatorDetail(
-                      indicatorName: item,
-                      category: widget.category,
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 15, vertical: 10),
+
+                // ✅ Ícono animado a la izquierda
+                leading: GestureDetector(
+                  onTap: () => _toggleDone(indicator),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDone ? Colors.teal : Colors.white,
+                      border: Border.all(
+                        color: isDone ? Colors.teal : Colors.grey,
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      isDone ? Icons.check : Icons.circle_outlined,
+                      color: isDone ? Colors.white : Colors.grey.shade600,
+                      size: 26,
                     ),
                   ),
-                );
+                ),
 
-                // 🔹 Si la pantalla de detalle devuelve true, marcar automáticamente como hecho
-                if (result == true) {
-                  setState(() {
-                    doneStatus[item] = true;
-                  });
-                }
+                // ✅ Título del indicador
+                title: Text(
+                  indicator,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    decoration: isDone
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
+                    color: isDone ? Colors.grey : Colors.black,
+                  ),
+                ),
 
-                _loadDoneStatus(); // sigue actualizando desde SharedPreferences
-              },
+                trailing: const Icon(Icons.arrow_forward_ios_rounded,
+                    size: 20, color: Colors.teal),
+
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => IndicatorDetail(
+                        indicatorName: indicator,
+                        category: widget.category,
+                      ),
+                    ),
+                  );
+
+                  // ✅ Si IndicatorDetail devolvió TRUE porque guardó un resultado
+                  if (result == true) {
+                    _loadFromPreferences(); // Volver a leer SharedPreferences
+                  }
+                },
+              ),
             ),
           );
         },

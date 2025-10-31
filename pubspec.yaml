@@ -1,44 +1,70 @@
-# 🐷 Proyecto Flutter para tu app de Bienestar Animal
-# Aquí le cambiamos el nombre oficial del proyecto a "SIBA"
+# 🐷 Proyecto Flutter para tu app SIBA
+# Evaluación del Bienestar Animal - ICA
 
-name: siba                  # 👈 Nuevo nombre del proyecto
+name: siba
 description: Aplicación móvil para evaluación del bienestar animal.
-publish_to: 'none'          # 👈 Esto evita que se publique en línea (solo local)
-version: 1.0.0+1            # 👈 Versión de la app (puedes cambiarla en el futuro)
+publish_to: 'none'
+version: 1.0.0+1
 
-# 🔧 Versión del SDK de Dart compatible con tu proyecto
+# 🔧 Versión del SDK de Dart
 environment:
-  sdk: ">=2.18.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
-# 📦 DEPENDENCIAS: librerías necesarias para tu app
+# 📦 DEPENDENCIAS
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2          # Íconos estilo iOS
-  shared_preferences: ^2.2.3       # Guardar datos simples en el teléfono
-  sqflite: ^2.0.0+4                # Base de datos local (SQLite)
-  path_provider: ^2.0.11           # Buscar carpetas del sistema
-  path: ^1.8.2                     # Manejar rutas de archivos
-  image_picker: ^1.0.4             # Elegir o tomar fotos
-  url_launcher: ^6.1.10     
 
-# 🧪 DEPENDENCIAS DE DESARROLLO: pruebas y reglas de código
+  # ✅ Dependencias útiles
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.2.3
+  sqflite: ^2.3.3
+  path_provider: ^2.1.2
+  path: ^1.9.0
+  image_picker: ^1.1.1
+  url_launcher: ^6.3.1
+
+  # ✅ Firebase (compatibles con Flutter moderno)
+  firebase_core: ^3.8.0
+  cloud_firestore: ^5.4.4
+  firebase_storage: ^12.1.3
+
+  # ✅ Saber si hay Internet
+  connectivity_plus: ^6.0.3
+
+  # ✅ Permisos del sistema
+  permission_handler: ^11.3.1
+
+  # ✅ Crear archivos Excel (.xlsx)
+  excel: ^4.0.3
+
+  # ✅ Crear archivos PDF
+  pdf: ^3.11.3
+  printing: ^5.12.0
+
+  # ✅ Manejo de fechas
+  intl: ^0.19.0
+
+# 🧪 DEPENDENCIAS DE DESARROLLO
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
-  flutter_launcher_icons: ^0.14.4   # 👈 Agregamos esta línea (la más importante)
+  flutter_lints: ^4.0.0
 
-# 🎨 SECCIÓN FLUTTER: configuración visual y recursos
+  # ✅ Para generar iconos de la app
+  flutter_launcher_icons: ^0.14.4
+
+# 🎨 CONFIGURACIÓN FLUTTER
 flutter:
-  uses-material-design: true       # Activa el diseño Material Design
+  uses-material-design: true
 
-  # 📁 Aquí se declaran las imágenes o recursos que usas
   assets:
-    - assets/icono.png      # Tu logo del cerdito con la gallina 🐷🐔
-    - assets/porcino1.jpg       
-# 🧩 CONFIGURACIÓN DEL ÍCONO DE LA APP
+    - assets/icono.png
+    - assets/porcino1.jpg
+
+# 🧩 CONFIGURACIÓN DEL ICONO
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icono.png"
+

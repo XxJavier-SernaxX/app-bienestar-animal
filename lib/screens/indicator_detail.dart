@@ -1,9 +1,16 @@
-// lib/screens/indicator_detail.dart
+// ✅ Pantalla moderna de detalle del indicador (SIBA)
+// ---------------------------------------------------------------
+// Explicación estudiante:
+// Esta pantalla sirve para evaluar un indicador.
+// El usuario elige una calificación (100, 55, 20, 0 puntos).
+// También puede tomar una foto como evidencia.
+// Al final guarda todo en la memoria del celular (SharedPreferences).
+
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 class IndicatorDetail extends StatefulWidget {
   final String indicatorName;
@@ -20,12 +27,11 @@ class IndicatorDetail extends StatefulWidget {
 }
 
 class _IndicatorDetailState extends State<IndicatorDetail> {
-  int? selectedScore;
-  File? _image;
+  int? selectedScore;   // ✅ La calificación escogida
+  File? _image;         // ✅ Foto tomada
 
-  // === Tabla de puntuaciones personalizadas por indicador ===
+  // ✅ Tabla de puntuaciones personalizada (copiada igual a tu versión original)
   final Map<String, Map<int, String>> indicatorScores = {
-    // ---- RECURSOS ----
     'Estado de los Comederos': {
       100: 'Todos los comederos limpios y sin riesgo de contaminación.',
       55: 'Más del 50% limpios y sin riesgo.',
@@ -272,70 +278,248 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
 
   };
 
+  // ✅ Tomar foto desde la cámara
   Future<void> _takePhoto() async {
-    final ImagePicker picker = ImagePicker();
+    final picker = ImagePicker();
     final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+
     if (photo != null) {
       setState(() => _image = File(photo.path));
     }
   }
 
+  // ✅ Eliminar foto
+  void _deletePhoto() {
+    setState(() => _image = null);
+  }
+
+  // ✅ Guardar calificación y foto
   Future<void> _saveResult() async {
-  if (selectedScore == null) return;
+    if (selectedScore == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Selecciona una calificación antes de guardar")),
+      );
+      return;
+    }
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  final key = '${widget.category}_${widget.indicatorName}';
-  final result = {
-    'score': selectedScore,
-    'photo': _image?.path,
-  };
+    final prefs = await SharedPreferences.getInstance();
+    final key = "${widget.category}_${widget.indicatorName}";
 
-  prefs.setString(key, jsonEncode(result));
+    final result = {
+      "indicador": widget.indicatorName,
+      "categoria": widget.category,
+      "puntos": selectedScore,
+      "foto": _image?.path
+    };
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Resultado guardado correctamente ✅')),
-  );
+    prefs.setString(key, jsonEncode(result));
 
-  // 🔹 Devuelve true al cerrar, para indicar que se guardó
-  Navigator.pop(context, true);
-}
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("✅ Resultado guardado")),
+    );
+
+    Navigator.pop(context, true); // ✅ Marca como hecho en IndicatorList
+  }
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Labels que corresponden al indicador
     final scoreLabels = indicatorScores[widget.indicatorName] ??
-        {100: 'Cumple completamente', 55: 'Más del 50% cumple', 0: 'No cumple'};
+        {100: 'Cumple', 55: 'Más del 50% cumple', 0: 'No cumple'};
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.indicatorName)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.teal.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.teal,
+        title: Text(widget.indicatorName),
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Seleccione una calificación:',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
+            // ----------------------------------------------------------
+            // ✅ TÍTULO
+            // ----------------------------------------------------------
+            Text(
+              "Selecciona una calificación:",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal.shade900,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // ----------------------------------------------------------
+            // ✅ TARJETAS MODERNAS PARA CALIFICACIONES
+            // ----------------------------------------------------------
             ...scoreLabels.entries.map((entry) {
-              return RadioListTile<int>(
-                title: Text('${entry.key} puntos - ${entry.value}'),
-                value: entry.key,
-                groupValue: selectedScore,
-                onChanged: (value) => setState(() => selectedScore = value),
+              final score = entry.key;
+              final text = entry.value;
+              final isSelected = selectedScore == score;
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.teal : Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                      color: Colors.black.withOpacity(0.08),
+                    )
+                  ],
+                ),
+                child: InkWell(
+                  onTap: () => setState(() => selectedScore = score),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isSelected
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color: isSelected ? Colors.white : Colors.teal,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "$score puntos — $text",
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: isSelected ? Colors.white : Colors.black87,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }),
+
+            const SizedBox(height: 25),
+
+            // ----------------------------------------------------------
+            // ✅ FOTO
+            // ----------------------------------------------------------
+            Text(
+              "Evidencia fotográfica:",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal.shade900,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 220,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                    color: Colors.black.withOpacity(0.08),
+                  )
+                ],
+                image: _image != null
+                    ? DecorationImage(
+                        fit: BoxFit.cover,
+                        image: FileImage(_image!),
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(0.25),
+                          BlendMode.darken,
+                        ),
+                      )
+                    : null,
+              ),
+
+              child: Stack(
+                children: [
+                  if (_image == null)
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt,
+                              size: 50, color: Colors.grey.shade500),
+                          const SizedBox(height: 10),
+                          Text(
+                            "Aún no hay foto",
+                            style: TextStyle(
+                                color: Colors.grey.shade700, fontSize: 16),
+                          )
+                        ],
+                      ),
+                    ),
+
+                  // ✅ Botón tomar foto
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    child: ElevatedButton.icon(
+                      onPressed: _takePhoto,
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text("Tomar foto"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                      ),
+                    ),
+                  ),
+
+                  // ✅ Botón eliminar foto
+                  if (_image != null)
+                    Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: ElevatedButton.icon(
+                        onPressed: _deletePhoto,
+                        icon: const Icon(Icons.delete),
+                        label: const Text("Eliminar"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 35),
+
+            // ----------------------------------------------------------
+            // ✅ BOTÓN GUARDAR
+            // ----------------------------------------------------------
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _saveResult,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal.shade700,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  "Guardar resultado",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _takePhoto,
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Tomar foto'),
-            ),
-            const SizedBox(height: 10),
-            if (_image != null)
-              Image.file(_image!, height: 150, fit: BoxFit.cover),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _saveResult,
-              child: const Text('Guardar resultado'),
-            ),
           ],
         ),
       ),
