@@ -11,7 +11,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 import '../helpers/database_helper.dart';
+import '../services/supabase_sync_service.dart';
 
 class IndicatorDetail extends StatefulWidget {
   final String indicatorName;
@@ -490,6 +492,9 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
       'photo': _image?.path,
     };
     await DatabaseHelper.instance.insertResponse(response);
+
+    // Auto-sincronizacion en segundo plano con Supabase si hay red
+    unawaited(SupabaseSyncService.instance.syncPendingData());
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("✅ Resultado guardado")),
