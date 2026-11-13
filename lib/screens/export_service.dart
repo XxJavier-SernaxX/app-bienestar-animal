@@ -16,28 +16,28 @@ class ExportService {
 
     // encabezados
     sheet.appendRow([
-      'IndicatorId',
-      'IndicatorTitle',
-      'Score',
-      'Timestamp',
-      'Evaluador',
-      'Fecha Evaluacion',
-      'Observaciones',
-      'Species',
-      'PhotoPath'
+      TextCellValue('IndicatorId'),
+      TextCellValue('IndicatorTitle'),
+      TextCellValue('Score'),
+      TextCellValue('Timestamp'),
+      TextCellValue('Evaluador'),
+      TextCellValue('Fecha Evaluacion'),
+      TextCellValue('Observaciones'),
+      TextCellValue('Species'),
+      TextCellValue('PhotoPath')
     ]);
 
     for (var r in filtered) {
       sheet.appendRow([
-        r['indicatorId'] ?? '',
-        r['indicatorTitle'] ?? '',
-        r['score']?.toString() ?? '',
-        r['timestamp'] ?? '',
-        r['evaluador'] ?? '',
-        r['fecha_evaluacion'] ?? '',
-        r['observaciones'] ?? '',
-        r['species'] ?? '',
-        r['photo'] ?? '',
+        TextCellValue(r['indicatorId']?.toString() ?? ''),
+        TextCellValue(r['indicatorTitle']?.toString() ?? ''),
+        TextCellValue(r['score']?.toString() ?? ''),
+        TextCellValue(r['timestamp']?.toString() ?? ''),
+        TextCellValue(r['evaluador']?.toString() ?? ''),
+        TextCellValue(r['fecha_evaluacion']?.toString() ?? ''),
+        TextCellValue(r['observaciones']?.toString() ?? ''),
+        TextCellValue(r['species']?.toString() ?? ''),
+        TextCellValue(r['photo']?.toString() ?? ''),
       ]);
     }
 

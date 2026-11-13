@@ -61,6 +61,7 @@ flutter:
   assets:
     - assets/icono.png
     - assets/porcino1.jpg
+    - assets/aves1.png
 
 # 🧩 CONFIGURACIÓN DEL ICONO
 flutter_launcher_icons:

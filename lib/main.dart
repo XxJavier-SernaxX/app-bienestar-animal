@@ -18,14 +18,22 @@ import 'screens/survey_page.dart';
 import 'screens/indicator_list.dart';
 import 'screens/indicator_detail.dart';
 import 'screens/resultados_screen.dart';
+import 'services/supabase_sync_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ Inicializar Firebase ANTES de arrancar la app
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print('Firebase init warning (offline mode ready): ');
+  }
+
+  // ✅ Inicializar listener de sincronización offline-first con Supabase
+  SupabaseSyncService.instance;
 
   runApp(const BienestarApp());
 }
@@ -74,6 +82,7 @@ class BienestarApp extends StatelessWidget {
         '/indicator_detail': (context) => IndicatorDetail(
               indicatorName: 'Condición Corporal',
               category: 'animal',
+              species: 'porcinos',
             ),
 
         // ✅ Resultados finales

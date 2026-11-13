@@ -38,7 +38,12 @@ class _ResultsPageState extends State<ResultsPage> {
     final data = await DatabaseHelper.instance.getAllResponses();
 
     // Filtrar por especie seleccionada
-    final filtered = data.where((e) => e['species'] == widget.species).toList();
+    final filtered = data.where((e) {
+      if (e['species'] == null) return false;
+      final dbSp = e['species'].toString().toLowerCase();
+      final filterSp = widget.species.toLowerCase();
+      return dbSp == filterSp || dbSp.contains(filterSp) || filterSp.contains(dbSp);
+    }).toList();
 
     setState(() {
       resultados = filtered;

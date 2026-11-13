@@ -30,62 +30,100 @@ class IndicatorList extends StatefulWidget {
 }
 
 class _IndicatorListState extends State<IndicatorList> {
-  // ✅ Indicadores por categoría
-  final Map<String, List<String>> indicators = {
-    'recursos': [
-      'Estado de los Comederos',
-      'Acceso al Agua (flujo)',
-      'Estado de limpieza de los bebederos',
-      'Altura de los bebederos',
-      'Número de bebederos por animal',
-      'Protección ante condiciones ambientales',
-      'Ventilación',
-      'Iluminación',
-      'Superficie de descanso',
-      'Resguardo para lechones',
-      'Espacio disponible para cerdas',
-      'Jaulas de libre acceso y/o muros de ocultación para cerdas en corrales',
-      'Jaulas adecuadas al tamaño de la cerda',
-      'Espacio disponible para verracos',
-      'Espacio disponible para precebo, ceba y reemplazos',
-      'Inspección de los animales',
-      'Instalaciones y elementos para manejo',
-      'Material de enriquecimiento',
-    ],
-    'animal': [
-      'Condición Corporal',
-      'Heces sobre el cuerpo',
-      'Jadeo y/o Temblores',
-      'Amonotonamiento (animales tumbados alojados en grupo)',
-      'Heridas en el cuerpo',
-      'Uso de material de enriquecimiento',
-      'Relación Humano – Animal',
-    ],
-    'gestion': [
-      'Identificación de animales',
-      'Dietas balanceadas con registro ICA',
-      'Alimentaciones adaptadas a necesidades fisiológicas',
-      'Ayuno antes del transporte',
-      'Plan de contingencia para falta de agua y alimento',
-      'Plan para desastres naturales',
-      'Plan Sanitario (Prevención, Diagnóstico)',
-      'Programas oficiales del ICA',
-      'Enfermedades de declaración obligatoria',
-      'Tratamiento de animales enfermos',
-      'Buenas prácticas de uso de medicamentos',
-      'Registro de Mortalidad - Lechones',
-      'Registro de Mortalidad - Hembras de cría',
-      'Registro de Mortalidad - Precebos y Ceba',
-      'Procedimiento de manejo de los animales',
-      'Prácticas dolorosas – descolmille y/o limado de colmillos',
-      'Prácticas dolorosas – descole',
-      'Castración inmunológica y/o castración quirúrgica',
-      'Intervenciones quirúrgicas por personal adecuado',
-      'Capacitación del personal que realiza sacrificio humanitario o eutanasia',
-      'Procedimiento para el sacrificio humanitario',
-      'Capacitación del personal en manejo de cerdos, reproducción, salud y bienestar animal'
-    ],
+  // ✅ Indicadores por categoría y especie (Porcinos y Aves)
+  final Map<String, Map<String, List<String>>> speciesIndicators = {
+    'porcinos': {
+      'recursos': [
+        'Estado de los Comederos',
+        'Acceso al Agua (flujo)',
+        'Estado de limpieza de los bebederos',
+        'Altura de los bebederos',
+        'Número de bebederos por animal',
+        'Protección ante condiciones ambientales',
+        'Ventilación',
+        'Iluminación',
+        'Superficie de descanso',
+        'Resguardo para lechones',
+        'Espacio disponible para cerdas',
+        'Jaulas de libre acceso y/o muros de ocultación para cerdas en corrales',
+        'Jaulas adecuadas al tamaño de la cerda',
+        'Espacio disponible para verracos',
+        'Espacio disponible para precebo, ceba y reemplazos',
+        'Inspección de los animales',
+        'Instalaciones y elementos para manejo',
+        'Material de enriquecimiento',
+      ],
+      'animal': [
+        'Condición Corporal',
+        'Heces sobre el cuerpo',
+        'Jadeo y/o Temblores',
+        'Amonotonamiento (animales tumbados alojados en grupo)',
+        'Heridas en el cuerpo',
+        'Uso de material de enriquecimiento',
+        'Relación Humano – Animal',
+      ],
+      'gestion': [
+        'Identificación de animales',
+        'Dietas balanceadas con registro ICA',
+        'Alimentaciones adaptadas a necesidades fisiológicas',
+        'Ayuno antes del transporte',
+        'Plan de contingencia para falta de agua y alimento',
+        'Plan para desastres naturales',
+        'Plan Sanitario (Prevención, Diagnóstico)',
+        'Programas oficiales del ICA',
+        'Enfermedades de declaración obligatoria',
+        'Tratamiento de animales enfermos',
+        'Buenas prácticas de uso de medicamentos',
+        'Registro de Mortalidad - Lechones',
+        'Registro de Mortalidad - Hembras de cría',
+        'Registro de Mortalidad - Precebos y Ceba',
+        'Procedimiento de manejo de los animales',
+        'Prácticas dolorosas – descolmille y/o limado de colmillos',
+        'Prácticas dolorosas – descole',
+        'Castración inmunológica y/o castración quirúrgica',
+        'Intervenciones quirúrgicas por personal adecuado',
+        'Capacitación del personal que realiza sacrificio humanitario o eutanasia',
+        'Procedimiento para el sacrificio humanitario',
+        'Capacitación del personal en manejo de cerdos, reproducción, salud y bienestar animal'
+      ],
+    },
+    'aves': {
+      'recursos': [
+        'Estado e integridad de las jaulas/nidales',
+        'Calidad de los comederos',
+        'Acceso y funcionamiento de bebederos',
+        'Calidad de la cama',
+        'Confort térmico (ventiladores/cortinas)',
+        'Iluminación (fotoperiodo)',
+        'Densidad de población',
+        'Calidad del agua de bebida',
+        'Limpieza y desinfección de instalaciones',
+      ],
+      'animal': [
+        'Estado y limpieza del plumaje',
+        'Condición corporal',
+        'Presencia de jadeo',
+        'Amontonamiento',
+        'Lesiones cutáneas (picoteo/heridas)',
+        'Deformidad del hueso de la quilla',
+        'Pododermatitis',
+        'Estado de los ojos y fosas nasales',
+        'Integridad del pico',
+      ],
+      'gestion': [
+        'Registros de mortalidad',
+        'Plan sanitario (vacunación/desparasitación)',
+        'Plan de contingencia',
+        'Procedimiento de eutanasia / sacrificio humanitario',
+        'Capacitación del personal',
+        'Registro de tratamientos veterinarios y tiempo de retiro',
+        'Ayuno pre-transporte',
+      ],
+    }
   };
+
+  // ✅ Normalizar especie (Porcinos -> porcinos, Aves de Postura -> aves)
+  String get normSpecies => widget.species.toLowerCase().contains('aves') ? 'aves' : 'porcinos';
 
   // ✅ Estado de los indicadores completados
   Map<String, bool> doneStatus = {};
@@ -99,11 +137,12 @@ class _IndicatorListState extends State<IndicatorList> {
   // ✅ Carga desde SharedPreferences lo que ya está hecho
   Future<void> _loadFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-
     Map<String, bool> temp = {};
 
-    for (String ind in indicators[widget.category]!) {
-      final key = "${widget.category}_$ind";
+    final items = speciesIndicators[normSpecies]?[widget.category] ?? [];
+
+    for (String ind in items) {
+      final key = "${normSpecies}_${widget.category}_$ind";
       final exist = prefs.getString(key); // Si existe → ya tiene resultado
       temp[ind] = (exist != null);
     }
@@ -120,7 +159,7 @@ class _IndicatorListState extends State<IndicatorList> {
 
   @override
   Widget build(BuildContext context) {
-    final items = indicators[widget.category]!;
+    final items = speciesIndicators[normSpecies]?[widget.category] ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -196,6 +235,7 @@ class _IndicatorListState extends State<IndicatorList> {
                       builder: (_) => IndicatorDetail(
                         indicatorName: indicator,
                         category: widget.category,
+                        species: widget.species,
                       ),
                     ),
                   );

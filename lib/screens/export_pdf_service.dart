@@ -1,5 +1,6 @@
 // lib/services/export_pdf_service.dart
 import 'dart:io';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import '../helpers/database_helper.dart';
@@ -16,7 +17,7 @@ class ExportPdfService {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: pw.PdfPageFormat.a4,
+        pageFormat: PdfPageFormat.a4,
         build: (context) => [
           pw.Header(level: 0, child: pw.Text('Informe SIBA - $species', style: pw.TextStyle(fontSize: 20))),
           pw.Text('Fecha: ${df.format(DateTime.now())}'),

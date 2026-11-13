@@ -25,9 +25,11 @@ class _ResultsPageState extends State<ResultsPage> {
     final allKeys = prefs.getKeys();
     final Map<String, dynamic> loaded = {};
 
+    final normSpecies = widget.species.toLowerCase().contains('aves') ? 'aves' : 'porcinos';
+
     // Filtrar por especie: guardamos claves con el prefijo '{species}_...'
     for (var key in allKeys) {
-      if (!key.startsWith('${widget.species}_')) continue;
+      if (!key.startsWith('${normSpecies}_')) continue;
       final data = prefs.getString(key);
       if (data != null) {
         loaded[key] = jsonDecode(data);

@@ -40,7 +40,12 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
 
     final filtered = widget.species == null
         ? all
-        : all.where((e) => e['species'] == widget.species).toList();
+        : all.where((e) {
+            if (e['species'] == null) return false;
+            final dbSp = e['species'].toString().toLowerCase();
+            final filterSp = widget.species!.toLowerCase();
+            return dbSp == filterSp || dbSp.contains(filterSp) || filterSp.contains(dbSp);
+          }).toList();
 
     setState(() {
       resultados = filtered;

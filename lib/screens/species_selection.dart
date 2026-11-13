@@ -188,10 +188,65 @@ class SpeciesSelectionPage extends StatelessWidget {
                         title: "Aves de Postura",
                         color: Colors.orange,
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Módulo de Aves en desarrollo 🐔"),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => Scaffold(
+                                appBar: AppBar(
+                                  title: const Text("Bienestar Avícola"),
+                                  backgroundColor: Colors.orange,
+                                ),
+                                drawer: MenuDrawer(species: 'Aves de Postura'),
+                                body: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          bottomLeft: Radius.circular(20),
+                                          bottomRight: Radius.circular(20),
+                                        ),
+                                        child: Image.asset(
+                                          'assets/aves1.png',
+                                          height: 230,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Container(
+                                              height: 230,
+                                              color: Colors.orange.shade100,
+                                              child: const Icon(Icons.egg, size: 80, color: Colors.orange),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        child: Column(
+                                          children: const [
+                                            Text(
+                                              "Bienvenido al módulo de Bienestar Avícola 🐔",
+                                              style: TextStyle(
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.orange,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            SizedBox(height: 15),
+                                            Text(
+                                              "Usa el menú ☰ para explorar la evaluación del bienestar animal.",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           );
                         },
