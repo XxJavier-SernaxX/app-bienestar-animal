@@ -1,15 +1,8 @@
-// 🐷 Pantalla de inicio de sesión (Login Page) para la app SIBA
-// ---------------------------------------------------------------
-// Esta pantalla permite que el usuario escriba su nombre y (si quiere)
-// elegir una fecha. Si el usuario NO elige fecha, se guarda
-// automáticamente la fecha actual.
-//
-// Explicación en palabras simples:
-// ✅ Fondo suave con degradado
-// ✅ Logo centrado (assets/icono.png)
-// ✅ Caja blanca con campos ordenados
-// ✅ Botón grande para continuar
-// ✅ Se guardan los datos para usarlos en la siguiente pantalla
+// lib/screens/login_page.dart
+// -----------------------------------------------------------------------------
+// PANTALLA DE INICIO DE SESIÓN EDITORIAL · SISTEMA DE BIENESTAR ANIMAL (SIBA)
+// Granja Experimental UFPSO · Ocaña, Norte de Santander
+// -----------------------------------------------------------------------------
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,24 +15,46 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Controlador para leer el texto del nombre
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nameController =
+      TextEditingController(text: 'Javier Mauricio Serna Osorio');
+  final TextEditingController _codeController =
+      TextEditingController(text: '0192546');
 
-  // Aquí guardamos la fecha que el usuario escoja (si decide hacerlo)
   DateTime? _selectedDate;
-
-  // Esto es solo para mostrar un indicador mientras guarda los datos
   bool _isSaving = false;
 
-  // ---------------------------------------------------------------
-  // Función para abrir el calendario y permitir escoger la fecha
-  // ---------------------------------------------------------------
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedUser();
+  }
+
+  Future<void> _loadSavedUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString('userName');
+    if (savedName != null && savedName.isNotEmpty) {
+      _nameController.text = savedName;
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(), // Fecha actual por defecto
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF263F30),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFF353A35),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -49,16 +64,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // ---------------------------------------------------------------
-  // Función que guarda el nombre y la fecha, y avanza a la siguiente pantalla
-  // ---------------------------------------------------------------
   Future<void> _saveAndContinue() async {
     final name = _nameController.text.trim();
-
-    // Validación simple: si el nombre está vacío, mostramos un mensaje
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor escribe tu nombre')),
+        const SnackBar(
+          content: Text('Por favor escribe el nombre del evaluador.'),
+          backgroundColor: Color(0xFFB96E4B),
+        ),
       );
       return;
     }
@@ -66,25 +79,20 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isSaving = true);
 
     final prefs = await SharedPreferences.getInstance();
-
-    // Guardamos el nombre
     await prefs.setString('userName', name);
+    await prefs.setString('userCode', _codeController.text.trim());
 
-    // Si el usuario NO escogió fecha → ponemos la de hoy
     final now = DateTime.now();
     final String today =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    // Guardar fecha seleccionada o la fecha automática
     final String dateToSave = _selectedDate == null
         ? today
         : "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
     await prefs.setString('selectedDate', dateToSave);
 
-    // Simulamos que está cargando un momento
-    await Future.delayed(const Duration(milliseconds: 800));
-
+    await Future.delayed(const Duration(milliseconds: 400));
     setState(() => _isSaving = false);
 
     if (context.mounted) {
@@ -95,139 +103,257 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ---------------------------------------------------------------
-      // TÍTULO SUPERIOR
-      // ---------------------------------------------------------------
-      appBar: AppBar(
-        backgroundColor: Colors.teal.shade600,
-        title: const Text('SIBA - Bienestar Animal'),
-        centerTitle: true,
-      ),
-
-      // ---------------------------------------------------------------
-      // FONDO CON DEGRADADO VERDE SUAVE
-      // ---------------------------------------------------------------
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFE0F2F1), Color(0xFFB2DFDB)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-
+      backgroundColor: const Color(0xFFF8F9F5),
+      body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Card(
-              elevation: 8,
-              margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(25.0),
-
-                // ---------------------------------------------------------------
-                // CONTENIDO PRINCIPAL
-                // ---------------------------------------------------------------
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Logo centrado (coloca tu icono aquí)
-                    Image.asset(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo Oficial SIBA
+                  Container(
+                    width: 80,
+                    height: 80,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE8ECE6), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF263F30).withOpacity(0.06),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
                       'assets/icono.png',
-                      height: 90,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.pets, size: 40, color: Color(0xFF263F30)),
                     ),
+                  ),
 
-                    const SizedBox(height: 15),
+                  const SizedBox(height: 20),
 
-                    const Text(
-                      'Bienvenido a SIBA',
+                  // Títulos Editoriales
+                  const Text(
+                    'SIBA',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                      color: Color(0xFF263F30),
+                    ),
+                  ),
+                  const Text(
+                    'Sistema de Bienestar Animal · UFPSO',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF7A8279),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF496B4D).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Resolución 136 de 2020 · Porcinos y Aves',
                       style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.teal,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF263F30),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 25),
+                  const SizedBox(height: 30),
 
-                    // -------------------------- CAMPO DEL NOMBRE --------------------------
-                    TextField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Tu nombre',
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
+                  // Tarjeta Limpia de Formulario
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE8ECE6)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
+                      ],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    // -------------------------- CAMPO DE FECHA --------------------------
-                    GestureDetector(
-                      onTap: () => _selectDate(context),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 14, horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _selectedDate == null
-                                  ? 'Selecciona una fecha (opcional)'
-                                  : 'Fecha: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Icon(Icons.calendar_today,
-                                color: Colors.teal, size: 22),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    // -------------------------- BOTÓN PRINCIPAL --------------------------
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isSaving ? null : _saveAndContinue,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Identificación del Evaluador',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF263F30),
                           ),
                         ),
-                        child: _isSaving
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : const Text(
-                                'Continuar',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Los registros se firman con tu nombre y código institucional.',
+                          style: TextStyle(fontSize: 11, color: Color(0xFF7A8279)),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Campo de Nombre
+                        TextField(
+                          controller: _nameController,
+                          style: const TextStyle(fontSize: 14, color: Color(0xFF353A35)),
+                          decoration: InputDecoration(
+                            labelText: 'Nombre del Evaluador',
+                            labelStyle: const TextStyle(fontSize: 12, color: Color(0xFF7A8279)),
+                            prefixIcon: const Icon(Icons.person_outline, size: 20, color: Color(0xFF496B4D)),
+                            filled: true,
+                            fillColor: const Color(0xFFF8F9F5),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE8ECE6)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE8ECE6)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF263F30), width: 1.5),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // Campo de Código
+                        TextField(
+                          controller: _codeController,
+                          style: const TextStyle(fontSize: 14, color: Color(0xFF353A35)),
+                          decoration: InputDecoration(
+                            labelText: 'Código / Cédula',
+                            labelStyle: const TextStyle(fontSize: 12, color: Color(0xFF7A8279)),
+                            prefixIcon: const Icon(Icons.badge_outlined, size: 20, color: Color(0xFF496B4D)),
+                            filled: true,
+                            fillColor: const Color(0xFFF8F9F5),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE8ECE6)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE8ECE6)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF263F30), width: 1.5),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // Selección de Fecha
+                        GestureDetector(
+                          onTap: () => _selectDate(context),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9F5),
+                              border: Border.all(color: const Color(0xFFE8ECE6)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF496B4D)),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      _selectedDate == null
+                                          ? 'Fecha: Hoy (Automática)'
+                                          : 'Fecha: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                                      style: const TextStyle(fontSize: 13, color: Color(0xFF353A35)),
+                                    ),
+                                  ],
+                                ),
+                                const Icon(Icons.chevron_right, size: 18, color: Color(0xFF7A8279)),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        // Botón de Inicio
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: _isSaving ? null : _saveAndContinue,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF263F30),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                      ),
+                            ),
+                            child: _isSaving
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : const Text(
+                                    'Iniciar Auditoría de Campo',
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
 
-                    const SizedBox(height: 15),
+                  const SizedBox(height: 20),
 
-                    const Text(
-                      'Tu información se guarda solo en este dispositivo.',
-                      style: TextStyle(fontSize: 13, color: Colors.black54),
-                      textAlign: TextAlign.center,
+                  // Indicador de Tolerancia Offline
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE8ECE6)),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.wifi_off_rounded, size: 16, color: Color(0xFF496B4D)),
+                        SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Modo Offline-First · Guarda en SQLite y auto-sincroniza',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF7A8279)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

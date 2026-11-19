@@ -162,73 +162,82 @@ class _IndicatorListState extends State<IndicatorList> {
     final items = speciesIndicators[normSpecies]?[widget.category] ?? [];
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9F5),
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        elevation: 3,
+        backgroundColor: const Color(0xFF263F30),
+        elevation: 0,
         title: Text(
           widget.categoryTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
         ),
       ),
 
       body: ListView.builder(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final indicator = items[index];
           final isDone = doneStatus[indicator] ?? false;
 
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            child: Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(vertical: 7),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDone ? const Color(0xFF496B4D).withOpacity(0.4) : const Color(0xFFE8ECE6),
               ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 15, vertical: 10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
 
-                // ✅ Ícono animado a la izquierda
-                leading: GestureDetector(
-                  onTap: () => _toggleDone(indicator),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDone ? Colors.teal : Colors.white,
-                      border: Border.all(
-                        color: isDone ? Colors.teal : Colors.grey,
-                        width: 2,
-                      ),
-                    ),
-                    child: Icon(
-                      isDone ? Icons.check : Icons.circle_outlined,
-                      color: isDone ? Colors.white : Colors.grey.shade600,
-                      size: 26,
+              // ✅ Ícono de estado
+              leading: GestureDetector(
+                onTap: () => _toggleDone(indicator),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDone ? const Color(0xFF263F30) : Colors.white,
+                    border: Border.all(
+                      color: isDone ? const Color(0xFF263F30) : const Color(0xFFE8ECE6),
+                      width: 1.5,
                     ),
                   ),
-                ),
-
-                // ✅ Título del indicador
-                title: Text(
-                  indicator,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    decoration: isDone
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                    color: isDone ? Colors.grey : Colors.black,
+                  child: Icon(
+                    isDone ? Icons.check : Icons.circle_outlined,
+                    color: isDone ? Colors.white : Colors.grey.shade400,
+                    size: 20,
                   ),
                 ),
+              ),
 
-                trailing: const Icon(Icons.arrow_forward_ios_rounded,
-                    size: 20, color: Colors.teal),
+              // ✅ Título del indicador
+              title: Text(
+                indicator,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isDone ? FontWeight.w400 : FontWeight.w600,
+                  decoration: isDone ? TextDecoration.lineThrough : TextDecoration.none,
+                  color: isDone ? Colors.grey.shade500 : const Color(0xFF353A35),
+                ),
+              ),
 
-                onTap: () async {
+              trailing: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: Color(0xFF7A8279),
+              ),
+
+              onTap: () async {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -246,10 +255,9 @@ class _IndicatorListState extends State<IndicatorList> {
                   }
                 },
               ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+            );
+          },
+        ),
+      );
+    }
 }

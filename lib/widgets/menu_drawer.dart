@@ -1,12 +1,6 @@
 // lib/widgets/menu_drawer.dart
 // -----------------------------------------------------------------------------
-// DRAWER OFICIAL SIBA - SISTEMA DE BIENESTAR ANIMAL (UFPSO)
-// -----------------------------------------------------------------------------
-// Incluye:
-// - Navegación por categorías de la Resolución 136 de 2020.
-// - Acceso directo a documentos normativos oficiales con URLs reales del ICA y MinAgricultura.
-// - Botón de sincronización offline-first con Supabase.
-// - Enlace al Panel Web de Administración en Vercel.
+// DRAWER EDITORIAL SIBA - SISTEMA DE BIENESTAR ANIMAL (UFPSO)
 // -----------------------------------------------------------------------------
 
 import 'package:flutter/material.dart';
@@ -20,7 +14,6 @@ class MenuDrawer extends StatelessWidget {
 
   MenuDrawer({super.key, required this.species});
 
-  // Lista de secciones del menú
   final List<Map<String, String>> categories = [
     {'title': 'Recursos y Alojamiento', 'code': 'recursos'},
     {'title': 'Salud y Condición Animal', 'code': 'animal'},
@@ -35,27 +28,23 @@ class MenuDrawer extends StatelessWidget {
   Future<void> _openURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      print('No se pudo abrir la URL: $url');
+      debugPrint('No se pudo abrir la URL: $url');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      surfaceTintColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9F5),
       child: SafeArea(
         child: Column(
           children: [
-            // Header institucional moderno
+            // Header institucional editorial
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF004D40), Color(0xFF00796B)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: Color(0xFF263F30), // Verde bosque profundo
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,14 +52,20 @@ class MenuDrawer extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          species.toLowerCase().contains('ave') ? '🐔' : '🐷',
-                          style: const TextStyle(fontSize: 24),
+                        child: Image.asset(
+                          'assets/icono.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => Text(
+                            species.toLowerCase().contains('ave') ? '🐔' : '🐷',
+                            style: const TextStyle(fontSize: 22),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -81,16 +76,18 @@ class MenuDrawer extends StatelessWidget {
                             Text(
                               'SIBA · Bienestar Animal',
                               style: TextStyle(
-                                fontSize: 17,
+                                fontSize: 16,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
+                                letterSpacing: -0.2,
                               ),
                             ),
                             Text(
                               'Granja Experimental UFPSO',
                               style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
+                                color: Color(0xFF8BA77B),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -98,16 +95,18 @@ class MenuDrawer extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      'Res. 136 de 2020 · Metodología ICA',
-                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
+                    child: Text(
+                      species.toLowerCase().contains('ave')
+                          ? 'Módulo Aves · Resolución 253/2020'
+                          : 'Módulo Porcinos · Resolución 136/2020',
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -124,7 +123,11 @@ class MenuDrawer extends StatelessWidget {
                     leading: _getIcon(c['code']!),
                     title: Text(
                       c['title']!,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF353A35),
+                      ),
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -150,7 +153,7 @@ class MenuDrawer extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ResultadosScreen(),
+                              builder: (_) => const ResultadosScreen(),
                             ),
                           );
                           break;
@@ -164,7 +167,6 @@ class MenuDrawer extends StatelessWidget {
                           break;
 
                         case 'admin_web':
-                          // Abre el panel administrativo web en el navegador
                           _openURL('https://siba-admin-ufpso.vercel.app');
                           break;
                       }
@@ -176,14 +178,16 @@ class MenuDrawer extends StatelessWidget {
 
             // Pie institucional
             Container(
-              padding: const EdgeInsets.all(12),
-              border: Border(top: BorderSide(color: Colors.grey.shade200)),
+              padding: const EdgeInsets.all(14),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Color(0xFFE8ECE6))),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Text(
                     'UFPSO · GRIITEM · 2026',
-                    style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF7A8279), fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -194,38 +198,37 @@ class MenuDrawer extends StatelessWidget {
     );
   }
 
-  Icon _getIcon(String code) {
+  Widget _getIcon(String code) {
     switch (code) {
       case 'recursos':
-        return const Icon(Icons.home_repair_service_rounded, color: Color(0xFF00897B));
+        return const Icon(Icons.home_repair_service_outlined, color: Color(0xFF263F30), size: 20);
       case 'animal':
-        return const Icon(Icons.pets_rounded, color: Colors.orange);
+        return const Icon(Icons.pets_outlined, color: Color(0xFF496B4D), size: 20);
       case 'gestion':
-        return const Icon(Icons.shield_outlined, color: Colors.indigo);
+        return const Icon(Icons.shield_outlined, color: Color(0xFF263F30), size: 20);
       case 'resultados':
-        return const Icon(Icons.analytics_rounded, color: Colors.teal);
+        return const Icon(Icons.analytics_outlined, color: Color(0xFF496B4D), size: 20);
       case 'saved':
-        return const Icon(Icons.folder_shared_rounded, color: Colors.deepPurple);
+        return const Icon(Icons.folder_open_outlined, color: Color(0xFF263F30), size: 20);
       case 'sync':
-        return const Icon(Icons.cloud_sync_rounded, color: Colors.blue);
+        return const Icon(Icons.cloud_sync_outlined, color: Color(0xFF496B4D), size: 20);
       case 'normativa':
-        return const Icon(Icons.menu_book_rounded, color: Colors.redAccent);
+        return const Icon(Icons.menu_book_outlined, color: Color(0xFFB96E4B), size: 20);
       case 'admin_web':
-        return const Icon(Icons.open_in_browser_rounded, color: Color(0xFF2E7D32));
+        return const Icon(Icons.open_in_browser_rounded, color: Color(0xFF263F30), size: 20);
       default:
-        return const Icon(Icons.circle);
+        return const Icon(Icons.circle, size: 20);
     }
   }
 
-  // Ejecuta la sincronización con Supabase y muestra retroalimentación visual
   void _triggerSync(BuildContext context) async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(
           children: [
             SizedBox(
-              width: 18,
-              height: 18,
+              width: 16,
+              height: 16,
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             ),
             SizedBox(width: 12),
@@ -241,11 +244,13 @@ class MenuDrawer extends StatelessWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: result['status'] == 'complete' ? const Color(0xFF2E7D32) : Colors.orange.shade800,
+          backgroundColor: result['status'] == 'complete'
+              ? const Color(0xFF263F30)
+              : const Color(0xFFB96E4B),
           content: Text(
             result['status'] == 'complete'
                 ? '✅ Sincronización exitosa: ${result['synced']} registros subidos.'
-                : '📶 Sin conexión a Internet. Los datos se guardaron localmente en SQLite.',
+                : '📶 Sin conexión. Registros resguardados en SQLite local.',
           ),
           duration: const Duration(seconds: 4),
         ),
@@ -253,50 +258,53 @@ class MenuDrawer extends StatelessWidget {
     }
   }
 
-  // Diálogo con las URLs OFICIALES y reales de la normativa colombiana
   void _showNormativaModal(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: const [
-              Icon(Icons.picture_as_pdf, color: Colors.red),
+              Icon(Icons.menu_book_rounded, color: Color(0xFF263F30)),
               SizedBox(width: 8),
-              Text('Normativa Oficial ICA / MADR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                'Normativa Oficial ICA / MinAg',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF263F30)),
+              ),
             ],
           ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildPdfItem(
-                  title: 'Resolución 136 de 2020 (MADR)',
-                  subtitle: 'Manual de Bienestar en Porcinos y Especies Mayores',
+                _normativaTile(
+                  icon: '🐷',
+                  title: 'Resolución 136 de 2020 (MinAgricultura)',
+                  subtitle: 'Manual de condiciones de bienestar animal para la especie porcina.',
                   url: 'https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000136%20de%202020.pdf',
-                  context: context,
                 ),
-                const Divider(),
-                _buildPdfItem(
+                const Divider(height: 16, color: Color(0xFFE8ECE6)),
+                _normativaTile(
+                  icon: '📋',
                   title: 'Metodología EBA Porcinos 3.0 (ICA)',
-                  subtitle: 'Instrumento oficial de evaluación en granja',
+                  subtitle: 'Protocolo de rúbricas para comederos, bebederos y confort en granja.',
                   url: 'https://www.ica.gov.co/noticias/ica-metodologia-evaluacion-bienestar-porcino',
-                  context: context,
                 ),
-                const Divider(),
-                _buildPdfItem(
-                  title: 'Resolución 253 de 2020 (MADR)',
-                  subtitle: 'Manual de Bienestar en Aves de Postura',
+                const Divider(height: 16, color: Color(0xFFE8ECE6)),
+                _normativaTile(
+                  icon: '🐔',
+                  title: 'Resolución 253 de 2020 (Aves de Postura)',
+                  subtitle: 'Directrices técnicas de bienestar para gallinas ponedoras.',
                   url: 'https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000253%20de%202020.pdf',
-                  context: context,
                 ),
-                const Divider(),
-                _buildPdfItem(
-                  title: 'Cartilla de Bienestar en Aves (Fenavi / ICA)',
-                  subtitle: 'Guía técnica de alojamiento y confort avícola',
+                const Divider(height: 16, color: Color(0xFFE8ECE6)),
+                _normativaTile(
+                  icon: '🥚',
+                  title: 'Cartilla Fenavi & ICA (Aves de Postura)',
+                  subtitle: 'Manual de nidales, bebederos y ventilación.',
                   url: 'https://fenavi.org/wp-content/uploads/2021/03/Cartilla-Bienestar-Animal-Aves-Postura.pdf',
-                  context: context,
                 ),
               ],
             ),
@@ -304,7 +312,7 @@ class MenuDrawer extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cerrar', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Cerrar', style: TextStyle(color: Color(0xFF263F30), fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -312,23 +320,19 @@ class MenuDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildPdfItem({
+  Widget _normativaTile({
+    required String icon,
     required String title,
     required String subtitle,
     required String url,
-    required BuildContext context,
   }) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      dense: true,
-      leading: const Icon(Icons.file_open_rounded, color: Colors.redAccent),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11)),
-      trailing: const Icon(Icons.open_in_new, size: 18, color: Colors.teal),
-      onTap: () {
-        Navigator.pop(context);
-        _openURL(url);
-      },
+      leading: Text(icon, style: const TextStyle(fontSize: 22)),
+      title: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF263F30))),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: Color(0xFF7A8279))),
+      trailing: const Icon(Icons.open_in_new_rounded, size: 16, color: Color(0xFF496B4D)),
+      onTap: () => _openURL(url),
     );
   }
 }

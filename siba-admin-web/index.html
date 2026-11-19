@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIBA · Sistema de Bienestar Animal — Granja Experimental UFPSO</title>
   
-  <!-- Favicon con el Icono Oficial de la App SIBA -->
+  <!-- Favicon Oficial con el Icono de la App -->
   <link rel="icon" type="image/png" href="assets/icono.png">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Chart.js para Bioestadística Pecuaria -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <!-- SheetJS para Exportación a Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -23,42 +20,34 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Google Fonts: Space Grotesk (Titulares Técnicos) + Plus Jakarta Sans (Lectura) -->
+  <!-- Google Fonts: Newsreader (Editorial Serif) + Plus Jakarta Sans (Elegante & Técnico) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            display: ['"Space Grotesk"', 'sans-serif'],
+            serif: ['"Newsreader"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
           },
           colors: {
-            // Paleta Pecuaria / Agropecuaria Colombiana
-            campo: {
-              50: '#F5F7F4',
-              100: '#E7ECE5',
-              200: '#CFDACE',
-              600: '#266D4F',
-              700: '#1B543C',
-              800: '#133E2C',
-              900: '#0B271B', // Verde Bosque Profundo Institucional
-            },
-            arcilla: {
-              400: '#E06D53',
-              500: '#C85A32', // Terracota / Ladrillo de Granja
-              600: '#A94320',
-            },
-            maiz: {
-              400: '#F7C948',
-              500: '#E8B321', // Dorado Maíz Pecuario
-              600: '#C2910E',
-            },
-            pergamino: '#F8F6F0', // Fondo cálido de campo (no blanco hospital)
-            ceniza: '#2C3531',
+            siba: {
+              forest: '#263F30',     // Verde bosque oscuro identidad
+              deep: '#1A2E22',       // Verde muy profundo para sidebar/footer
+              moss: '#496B4D',       // Verde complementario de campo
+              sage: '#8BA77B',       // Verde prado suave
+              parchment: '#F8F9F5',  // Fondo crema natural editorial
+              card: '#FFFFFF',       // Fondo blanco limpio
+              charcoal: '#353A35',   // Texto principal (carbón suave)
+              muted: '#7A8279',      // Texto secundario
+              hairline: '#E8ECE6',   // Divisores sutiles
+              terracotta: '#B96E4B', // Alertas agropecuarias / arcilla
+              amber: '#D97706',      // Alertas preventivas
+            }
           }
         }
       }
@@ -67,431 +56,639 @@
 
   <style>
     body {
-      background-color: #F6F4ED;
-      background-image: radial-gradient(#E5DFD3 0.75px, transparent 0.75px);
-      background-size: 20px 20px;
+      background-color: #F8F9F5;
+      color: #353A35;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
-    .sello-ica {
-      border: 2px dashed #1B543C;
-      background: rgba(27, 84, 60, 0.04);
+    
+    /* Tipografía editorial fluida */
+    .font-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+      letter-spacing: -0.02em;
     }
-    .badge-critico { background-color: #FEE2E2; color: #991B1B; border: 1px solid #F87171; }
-    .badge-regular { background-color: #FFEDD5; color: #9A3412; border: 1px solid #FB923C; }
-    .badge-bueno   { background-color: #FEF9C3; color: #854D0E; border: 1px solid #FACC15; }
-    .badge-excelente { background-color: #DCFCE7; color: #166534; border: 1px solid #4ADE80; }
+
+    /* Líneas ultrafinas de diseño editorial */
+    .hairline-b { border-bottom: 1px solid #E8ECE6; }
+    .hairline-t { border-top: 1px solid #E8ECE6; }
+    .hairline-r { border-right: 1px solid #E8ECE6; }
+    .hairline-l { border-left: 1px solid #E8ECE6; }
+
+    /* Estilos sutiles de badge sin brillos estridentes */
+    .pill-excelente { background-color: #EBF4EC; color: #235933; border: 1px solid #C4DFC8; }
+    .pill-bueno     { background-color: #F5F7EB; color: #5B6B1E; border: 1px solid #DCE3BE; }
+    .pill-regular   { background-color: #FDF4E7; color: #8F5310; border: 1px solid #F3D2A7; }
+    .pill-critico   { background-color: #FAF0EE; color: #9E3725; border: 1px solid #EBC3BC; }
+
+    /* Scrollbar minimalista */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F8F9F5; }
+    ::-webkit-scrollbar-thumb { background: #D5DDD3; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8BA77B; }
   </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col font-sans selection:bg-campo-600 selection:text-white">
+<body class="min-h-full flex flex-col antialiased selection:bg-siba-forest selection:text-white">
 
   <!-- ========================================================================= -->
-  <!-- BARRA SUPERIOR INSTITUCIONAL (DISTINTIVA, AGRO-TECNOLÓGICA)              -->
+  <!-- ESTRUCTURA PRINCIPAL: BARRA LATERAL EDITORIAL + CONTENIDO PRINCIPAL      -->
   <!-- ========================================================================= -->
-  <header class="bg-campo-900 text-white border-b-4 border-arcilla-500 sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
-        
-        <!-- Logotipo Oficial SIBA (Usa icono.png real) -->
-        <div class="flex items-center space-x-3.5">
-          <div class="relative group">
-            <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-lg ring-2 ring-white/20 flex items-center justify-center overflow-hidden transition transform group-hover:scale-105">
+  <div class="flex-1 flex flex-col md:flex-row">
+    
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- BARRA LATERAL (SIDEBAR) VERTICAL VERDE BOSQUE (#263F30)                 -->
+    <!-- ----------------------------------------------------------------------- -->
+    <aside class="w-full md:w-64 bg-siba-deep md:min-h-screen text-stone-200 flex flex-col justify-between flex-shrink-0 z-40 md:sticky md:top-0 md:h-screen">
+      
+      <!-- Parte Superior: Identidad & Logo Oficial -->
+      <div>
+        <div class="p-6 hairline-b border-siba-forest/60 flex items-center justify-between">
+          <div class="flex items-center space-x-3.5">
+            <div class="w-10 h-10 rounded-xl bg-white/10 p-1.5 flex items-center justify-center border border-white/15">
               <img src="assets/icono.png" alt="SIBA Logo" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2830/2830305.png'">
             </div>
-            <span class="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-campo-900"></span>
-            </span>
-          </div>
-
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-display font-bold text-xl tracking-tight text-white">SIBA</span>
-              <span class="text-[10px] font-bold uppercase tracking-wider bg-arcilla-500 text-white px-2 py-0.5 rounded-md shadow-sm">Pecuario</span>
-              <span class="text-[11px] font-semibold text-campo-200 hidden md:inline">· Granja Experimental UFPSO</span>
-            </div>
-            <p class="text-xs text-campo-200 font-medium">Sistema de Bienestar Animal · Cerdos y Aves de Postura (Res. 136/2020)</p>
-          </div>
-        </div>
-
-        <!-- Acciones Rápidas del Administrador -->
-        <div class="flex items-center space-x-3">
-          
-          <!-- Estado de Conexión Nube / APK -->
-          <div id="liveSyncStatus" class="hidden sm:flex items-center space-x-2 bg-campo-800/80 border border-campo-700 px-3 py-1.5 rounded-xl text-xs">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="liveSyncText" class="text-campo-100 font-medium">Escuchando APK Android...</span>
-          </div>
-
-          <!-- Botón de Simulación de APK en Vivo -->
-          <button onclick="simulateMobileUpload()" title="Simular que un operario envía una evaluación desde el celular sin Wi-Fi que luego se conecta" class="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold px-3 py-2 rounded-xl transition">
-            <i data-lucide="smartphone" class="w-4 h-4"></i>
-            <span class="hidden md:inline">Simular envío APK</span>
-          </button>
-
-          <!-- Botón Exportar Excel Oficial -->
-          <button onclick="exportToExcel()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition transform active:scale-95">
-            <i data-lucide="sheet" class="w-4 h-4"></i>
-            <span>Exportar Excel</span>
-          </button>
-
-          <!-- Ajustes de Supabase -->
-          <button onclick="openConfigModal()" title="Configuración de base de datos Supabase" class="p-2 text-campo-200 hover:text-white hover:bg-campo-800 rounded-xl transition">
-            <i data-lucide="sliders" class="w-5 h-5"></i>
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </header>
-
-  <!-- ========================================================================= -->
-  <!-- CONTENIDO PRINCIPAL                                                       -->
-  <!-- ========================================================================= -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 flex-1 w-full space-y-7">
-
-    <!-- SECCIÓN HERO: DISTINTIVA CON CONTEXTO REAL DE CAMPO -->
-    <div class="bg-white rounded-3xl border border-stone-300/80 p-6 sm:p-8 shadow-sm relative overflow-hidden">
-      <!-- Decoración de fondo -->
-      <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none">
-        <img src="assets/icono.png" class="w-80 h-80 object-contain" alt="">
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
-        
-        <div class="lg:col-span-8 space-y-3">
-          <div class="inline-flex items-center gap-2 bg-campo-50 border border-campo-200 px-3 py-1 rounded-full text-xs font-bold text-campo-700">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-arcilla-500"></i>
-            <span>Granja Experimental UFPSO · Ocaña, Norte de Santander</span>
-          </div>
-
-          <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-stone-900 tracking-tight leading-tight">
-            Monitoreo Digital de Bienestar en <span class="text-campo-700 underline decoration-arcilla-500 decoration-wavy decoration-2">Porcinos</span> y <span class="text-arcilla-600 underline decoration-maiz-500 decoration-wavy decoration-2">Aves de Postura</span>
-          </h1>
-
-          <p class="text-stone-600 text-sm leading-relaxed max-w-2xl">
-            Centro de mando para consolidar las auditorías tomadas en campo con la aplicación móvil <strong>SIBA</strong>. Diseñado con tolerancia a desconexión (<strong>offline-first</strong>): los datos se capturan en galpones y corrales sin internet, y se sincronizan automáticamente en cuanto el dispositivo móvil detecta cobertura.
-          </p>
-
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <button onclick="filterBySpecies('Porcinos')" class="flex items-center gap-2 px-3.5 py-2 bg-stone-100 hover:bg-campo-50 hover:border-campo-300 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 transition">
-              <span>🐷</span> Módulo Porcinos (Comederos, Bebederos, Ceba)
-            </button>
-            <button onclick="filterBySpecies('Aves')" class="flex items-center gap-2 px-3.5 py-2 bg-stone-100 hover:bg-amber-50 hover:border-amber-300 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 transition">
-              <span>🐔</span> Módulo Aves (Nidos, Niples, Plumaje)
-            </button>
-            <button onclick="openNormativaModal()" class="flex items-center gap-1.5 px-3.5 py-2 bg-arcilla-50 hover:bg-arcilla-100 border border-arcilla-200 text-arcilla-600 rounded-xl text-xs font-bold transition">
-              <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
-              <span>Normativa ICA / MinAgricultura</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Tarjeta de Certificación y Estado del Predio -->
-        <div class="lg:col-span-4 bg-stone-50 rounded-2xl p-5 border border-stone-200/90 sello-ica flex flex-col justify-between space-y-4">
-          <div class="flex items-start justify-between">
             <div>
-              <span class="text-[10px] font-extrabold uppercase tracking-wider text-campo-800 bg-campo-100 px-2 py-0.5 rounded">Dictamen Global del Predio</span>
-              <p class="text-xs text-stone-500 mt-1">Marco Técnico Resolución 136 / 2020</p>
-            </div>
-            <span class="text-2xl">📋</span>
-          </div>
-
-          <div>
-            <div class="flex items-baseline gap-2">
-              <span id="heroAvgScore" class="text-4xl font-display font-extrabold text-stone-900">76.8</span>
-              <span class="text-xs font-bold text-stone-400">/ 100 pts</span>
-            </div>
-            <div class="mt-1 flex items-center gap-2">
-              <span class="inline-block w-3 h-3 rounded-full bg-amber-500"></span>
-              <span id="heroStatusText" class="text-xs font-bold text-amber-800">Cumplimiento Aceptable (Con observaciones)</span>
+              <span class="font-editorial text-2xl font-semibold tracking-wide text-white block leading-none">SIBA</span>
+              <span class="text-[10px] tracking-widest uppercase text-siba-sage font-medium mt-1 block">Bienestar Animal</span>
             </div>
           </div>
-
-          <div class="text-[11px] text-stone-500 border-t border-stone-200 pt-3 flex justify-between items-center">
-            <span>Evaluadores registrados:</span>
-            <span class="font-bold text-stone-700">Javier Serna / Juan Garrido</span>
-          </div>
+          <!-- Estado en Vivo (Punto Verde) -->
+          <span class="relative flex h-2.5 w-2.5" title="Sistema en línea">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
         </div>
 
-      </div>
-    </div>
+        <!-- Navegación Primaria -->
+        <nav class="px-4 py-6 space-y-1 text-xs font-medium">
+          <a href="#inicio" onclick="filterBySpecies('ALL')" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-white bg-siba-forest/70 hover:bg-siba-forest transition group">
+            <i data-lucide="compass" class="w-4 h-4 text-siba-sage"></i>
+            <span>Visión General</span>
+          </a>
 
-    <!-- TARJETAS DE INDICADORES CLAVE (KPIS) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      
-      <!-- Total Auditorías -->
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400">Total Auditorías</span>
-          <p id="kpiTotalEvals" class="text-3xl font-display font-extrabold text-stone-900 mt-1">4</p>
-          <p class="text-xs text-campo-700 font-semibold mt-1 flex items-center gap-1">
-            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-            <span>Porcinos y Aves UFPSO</span>
-          </p>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-campo-50 text-campo-700 flex items-center justify-center font-bold text-xl">
-          📊
-        </div>
-      </div>
+          <a href="#porcinos" onclick="filterBySpecies('Porcinos')" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition group">
+            <i data-lucide="layers" class="w-4 h-4 text-stone-400 group-hover:text-siba-sage transition"></i>
+            <span>Línea Porcina</span>
+          </a>
 
-      <!-- Lotes Porcinos Auditados -->
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400">Sector Porcinos</span>
-          <p id="kpiPorcinosCount" class="text-3xl font-display font-extrabold text-stone-900 mt-1">3 lotes</p>
-          <p class="text-xs text-stone-500 mt-1">Ceba, Cría y Maternidad</p>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-2xl">
-          🐷
-        </div>
-      </div>
+          <a href="#aves" onclick="filterBySpecies('Aves')" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition group">
+            <i data-lucide="feather" class="w-4 h-4 text-stone-400 group-hover:text-siba-sage transition"></i>
+            <span>Aves de Postura</span>
+          </a>
 
-      <!-- Sector Aves de Postura -->
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-stone-400">Sector Aves Postura</span>
-          <p id="kpiAvesCount" class="text-3xl font-display font-extrabold text-stone-900 mt-1">2 galpones</p>
-          <p class="text-xs text-emerald-600 font-semibold mt-1">90.0 pts promedio (Excelente)</p>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-2xl">
-          🐔
-        </div>
-      </div>
+          <a href="#diario" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition group">
+            <i data-lucide="book-open" class="w-4 h-4 text-stone-400 group-hover:text-siba-sage transition"></i>
+            <span>Diario de Campo</span>
+          </a>
 
-      <!-- Alertas de Bienestar Crítico -->
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-arcilla-500">Alertas Sanitarias</span>
-          <p id="kpiAlertsCount" class="text-3xl font-display font-extrabold text-arcilla-600 mt-1">1</p>
-          <p class="text-xs text-arcilla-500 font-medium mt-1">Comederos / Jadeo térmico</p>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-red-50 text-arcilla-500 flex items-center justify-center font-bold">
-          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-        </div>
-      </div>
+          <a href="#alertas" class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition group">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-siba-terracotta group-hover:scale-110 transition"></i>
+            <span>Atención Prioritaria</span>
+          </a>
 
-    </div>
-
-    <!-- SECCIÓN TÉCNICA: DETALLE COMPARATIVO DE LAS DOS ESPECIES DEL PROYECTO -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-      <!-- Ficha Porcinos -->
-      <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2.5">
-              <span class="text-2xl">🐷</span>
-              <div>
-                <h3 class="font-display font-bold text-stone-900 text-base">Indicadores Clave · Especie Porcina</h3>
-                <p class="text-xs text-stone-500">Metodología EBA Porcinos 3.0 / ICA</p>
-              </div>
-            </div>
-            <span class="text-xs font-bold text-campo-700 bg-campo-50 px-2.5 py-1 rounded-md">Resolución 136/2020</span>
+          <div class="pt-4 pb-2 px-3.5 text-[10px] uppercase tracking-wider text-stone-400 font-semibold">
+            Herramientas
           </div>
 
-          <ul class="text-xs text-stone-600 space-y-2.5 pt-2">
-            <li class="flex items-start gap-2">
-              <i data-lucide="check" class="w-4 h-4 text-campo-600 flex-shrink-0 mt-0.5"></i>
-              <span><strong>Estado de Comederos:</strong> Tolvas limpias, sin alimento fermentado ni hongos. Espacio mínimo de 30 cm por cerdo en ceba.</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <i data-lucide="check" class="w-4 h-4 text-campo-600 flex-shrink-0 mt-0.5"></i>
-              <span><strong>Bebederos Chupón:</strong> Altura a 45°, caudal verificado de 1.5 a 2.0 litros/minuto por animal.</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <i data-lucide="check" class="w-4 h-4 text-campo-600 flex-shrink-0 mt-0.5"></i>
-              <span><strong>Salud y Condición:</strong> Evaluación de jadeo (estrés térmico), ausencia de mordeduras de cola y flancos limpios.</span>
-            </li>
-          </ul>
-        </div>
+          <button onclick="exportToExcel()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition text-left group">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+            <span>Exportar Sábana Excel</span>
+          </button>
 
-        <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
-          <span class="text-stone-500">Última auditoría en granja:</span>
-          <span class="font-bold text-stone-800">Lote Ceba P-04 (Corral 3)</span>
-        </div>
+          <button onclick="openNormativaModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition text-left group">
+            <i data-lucide="file-text" class="w-4 h-4 text-stone-400 group-hover:text-siba-sage"></i>
+            <span>Normativa ICA / MinAg</span>
+          </button>
+
+          <button onclick="openConfigModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-stone-300 hover:text-white hover:bg-siba-forest/40 transition text-left group">
+            <i data-lucide="settings" class="w-4 h-4 text-stone-400 group-hover:text-siba-sage"></i>
+            <span>Configuración Nube</span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Ficha Aves de Postura -->
-      <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2.5">
-              <span class="text-2xl">🐔</span>
-              <div>
-                <h3 class="font-display font-bold text-stone-900 text-base">Indicadores Clave · Aves de Postura</h3>
-                <p class="text-xs text-stone-500">Resolución 253 de 2020 / Fenavi</p>
-              </div>
-            </div>
-            <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">Gallinas Ponedoras</span>
+      <!-- Parte Inferior: Perfil del Evaluador & Granja -->
+      <div class="p-4 m-4 rounded-xl bg-siba-forest/50 border border-siba-forest/80 text-[11px]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-siba-moss text-white flex items-center justify-center font-bold font-editorial text-sm">
+            JS
           </div>
-
-          <ul class="text-xs text-stone-600 space-y-2.5 pt-2">
-            <li class="flex items-start gap-2">
-              <i data-lucide="check" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-              <span><strong>Disponibilidad de Nidos:</strong> 1 nido por cada 5 aves en postura en piso, con cama de viruta limpia y seca.</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <i data-lucide="check" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-              <span><strong>Líneas de Niple con Copa:</strong> 1 niple por cada 8 a 10 gallinas, altura graduada a la comisura del pico.</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <i data-lucide="check" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-              <span><strong>Plumaje y Canibalismo:</strong> Cobertura plumosa intacta en cloaca y alas, ausencia de picaje severo.</span>
-            </li>
-          </ul>
+          <div class="overflow-hidden">
+            <p class="font-bold text-white truncate">Javier Mauricio Serna</p>
+            <p class="text-stone-300 text-[10px] truncate">Granja Experimental UFPSO</p>
+          </div>
         </div>
-
-        <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
-          <span class="text-stone-500">Última auditoría en granja:</span>
-          <span class="font-bold text-stone-800">Galpón Pon-01 (Naves)</span>
+        <div class="mt-2.5 pt-2 border-t border-siba-forest/70 flex items-center justify-between text-[10px] text-stone-400">
+          <span>Res. 136 de 2020</span>
+          <span class="text-emerald-400 font-medium">En línea</span>
         </div>
       </div>
 
-    </div>
+    </aside>
 
-    <!-- ========================================================================= -->
-    <!-- TABLA CENTRAL DE AUDITORÍAS REALES CON FOTOS Y DETALLES                   -->
-    <!-- ========================================================================= -->
-    <div class="bg-white rounded-3xl border border-stone-300 shadow-sm overflow-hidden">
-      
-      <!-- Cabecera de la Tabla y Filtros -->
-      <div class="p-5 border-b border-stone-200 bg-stone-50/70 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-        
-        <div>
-          <h2 class="font-display font-bold text-lg text-stone-900 flex items-center gap-2">
-            <span>Registro de Evaluaciones Tomadas en Campo</span>
-            <span id="tableBadgeCount" class="text-xs bg-campo-100 text-campo-800 px-2.5 py-0.5 rounded-full font-bold">4 auditorías</span>
-          </h2>
-          <p class="text-xs text-stone-500">Datos sincronizados desde la aplicación móvil Android en la Granja UFPSO</p>
-        </div>
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- CONTENIDO CENTRAL DE LA PLATAFORMA EDITORIAL                           -->
+    <!-- ----------------------------------------------------------------------- -->
+    <main class="flex-1 flex flex-col overflow-y-auto">
 
-        <!-- Barra de Búsqueda y Filtros de Especie -->
-        <div class="flex flex-wrap items-center gap-2.5">
+      <!-- ===================================================================== -->
+      <!-- CABECERA HERO EDITORIAL (2 COLUMNAS ASIMÉTRICAS)                      -->
+      <!-- ===================================================================== -->
+      <section id="inicio" class="p-6 md:p-12 hairline-b bg-white">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          <div class="relative flex-1 sm:w-64">
-            <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <!-- Columna Izquierda: Mensaje Editorial y Acceso Rápido -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="inline-flex items-center gap-2 text-[11px] font-semibold text-siba-moss tracking-wider uppercase">
+              <span class="w-2 h-2 rounded-full bg-siba-moss"></span>
+              <span id="currentDateHeader">Sábado, 14 de Noviembre de 2026 · Granja UFPSO</span>
+            </div>
+
+            <h1 class="font-editorial text-4xl sm:text-5xl lg:text-6xl text-siba-forest leading-[1.08] font-normal">
+              El bienestar comienza con el cuidado.
+            </h1>
+
+            <p class="text-siba-charcoal text-sm sm:text-base leading-relaxed max-w-xl font-light">
+              Monitoreo técnico de <strong>aves de postura</strong> y <strong>porcinos</strong> bajo el marco de la <em>Resolución 136 de 2020</em> y la metodología <em>EBA Porcinos 3.0</em>. Evaluaciones rigurosas capturadas directamente en galpón y corral con sincronización continua.
+            </p>
+
+            <div class="pt-2 flex flex-wrap items-center gap-3">
+              <button onclick="filterBySpecies('Porcinos')" class="px-5 py-2.5 rounded-full bg-siba-forest hover:bg-siba-deep text-white text-xs font-semibold tracking-wide transition transform active:scale-95 shadow-sm flex items-center gap-2">
+                <span>Ver Porcinos</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="filterBySpecies('Aves')" class="px-5 py-2.5 rounded-full bg-siba-parchment hover:bg-stone-200 text-siba-forest border border-siba-hairline text-xs font-semibold tracking-wide transition flex items-center gap-2">
+                <span>Ver Aves de Postura</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="exportToExcel()" class="px-4 py-2.5 rounded-full text-siba-muted hover:text-siba-forest text-xs font-medium transition flex items-center gap-1.5 ml-auto">
+                <i data-lucide="sheet" class="w-4 h-4 text-siba-moss"></i>
+                <span class="hidden sm:inline">Exportar reporte</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Fotografía Protagonista de Granja -->
+          <div class="lg:col-span-5">
+            <div class="relative group overflow-hidden rounded-2xl bg-stone-100 border border-siba-hairline">
+              <img 
+                src="assets/porcino1.jpg" 
+                alt="Porcinos en Granja Experimental UFPSO" 
+                class="w-full h-80 sm:h-96 object-cover object-center filter saturate-[0.95] group-hover:scale-102 transition duration-700 ease-out"
+                onerror="this.src='assets/porcino2.jpg'"
+              >
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+              <div class="absolute bottom-4 left-4 right-4 text-white">
+                <span class="text-[10px] uppercase tracking-widest font-mono text-siba-sage bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm">Registro de Campo</span>
+                <p class="font-editorial text-lg text-white mt-1">Evaluación de Confort y Densidad · Lote P-04</p>
+                <p class="text-[11px] text-stone-300 font-light">Corral 3 · Granja Experimental UFPSO</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- SECCIÓN 1: FRANJA HORIZONTAL DE ESTADÍSTICAS (EDITORIAL STRIP)        -->
+      <!-- ===================================================================== -->
+      <section class="hairline-b bg-siba-parchment">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-siba-hairline">
+          
+          <!-- Métrica 1: Total Evaluaciones -->
+          <div class="p-6 text-center lg:text-left">
+            <span class="text-[11px] uppercase tracking-wider text-siba-muted font-medium block">Total Evaluaciones</span>
+            <div class="mt-1 flex items-baseline justify-center lg:justify-start gap-1.5">
+              <span id="kpiTotalEvals" class="font-editorial text-4xl font-normal text-siba-forest">4</span>
+              <span class="text-xs text-siba-muted font-light">registradas</span>
+            </div>
+            <span class="text-[10px] text-siba-muted mt-1 block">Histórico 2026 UFPSO</span>
+          </div>
+
+          <!-- Métrica 2: Animales Monitoreados -->
+          <div class="p-6 text-center lg:text-left">
+            <span class="text-[11px] uppercase tracking-wider text-siba-muted font-medium block">Animales Monitoreados</span>
+            <div class="mt-1 flex items-baseline justify-center lg:justify-start gap-1.5">
+              <span class="font-editorial text-4xl font-normal text-siba-forest">3,450</span>
+              <span class="text-xs text-siba-muted font-light">cabezas</span>
+            </div>
+            <span class="text-[10px] text-siba-muted mt-1 block">Gallinas y Cerdos</span>
+          </div>
+
+          <!-- Métrica 3: Cumplimiento Promedio -->
+          <div class="p-6 text-center lg:text-left">
+            <span class="text-[11px] uppercase tracking-wider text-siba-muted font-medium block">Índice Global (IGBA)</span>
+            <div class="mt-1 flex items-baseline justify-center lg:justify-start gap-1.5">
+              <span id="kpiAvgScore" class="font-editorial text-4xl font-normal text-siba-forest">76.8</span>
+              <span class="text-xs text-siba-muted font-light">/ 100</span>
+            </div>
+            <span id="kpiAvgStatus" class="text-[10px] text-amber-700 font-medium mt-1 block">Cumplimiento Aceptable</span>
+          </div>
+
+          <!-- Métrica 4: Alertas Activas -->
+          <div class="p-6 text-center lg:text-left">
+            <span class="text-[11px] uppercase tracking-wider text-siba-terracotta font-medium block">Alertas Sanitarias</span>
+            <div class="mt-1 flex items-baseline justify-center lg:justify-start gap-1.5">
+              <span id="kpiAlertsCount" class="font-editorial text-4xl font-normal text-siba-terracotta">1</span>
+              <span class="text-xs text-siba-terracotta font-light">atención</span>
+            </div>
+            <span class="text-[10px] text-siba-terracotta mt-1 block">Bebederos y jadeo</span>
+          </div>
+
+          <!-- Métrica 5: Estado del Sistema -->
+          <div class="p-6 text-center lg:text-left col-span-2 lg:col-span-1">
+            <span class="text-[11px] uppercase tracking-wider text-siba-muted font-medium block">Estado Sincronización</span>
+            <div class="mt-2 flex items-center justify-center lg:justify-start gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="syncStatusBadge" class="text-xs font-semibold text-siba-forest">En Línea · Supabase</span>
+            </div>
+            <span class="text-[10px] text-siba-muted mt-1 block">Tolerancia Offline activa</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- SECCIÓN 2: LAS DOS LÍNEAS PRODUCTIVAS (PORCINOS & AVES)               -->
+      <!-- ===================================================================== -->
+      <section class="p-6 md:p-12 hairline-b bg-white">
+        <div class="max-w-6xl mx-auto space-y-12">
+          
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <span class="text-[11px] uppercase tracking-widest text-siba-moss font-semibold">Núcleo Zootécnico</span>
+              <h2 class="font-editorial text-3xl sm:text-4xl text-siba-forest font-normal mt-1">Líneas Productivas en Monitoreo</h2>
+            </div>
+            <p class="text-xs text-siba-muted max-w-md font-light">
+              Protocolos de bienestar adaptados a las condiciones agroclimáticas de Norte de Santander, auditados con rúbricas de campo validadas.
+            </p>
+          </div>
+
+          <!-- BLOQUE 1: LÍNEA PORCINA -->
+          <div id="porcinos" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-2xl bg-siba-parchment border border-siba-hairline p-6 lg:p-8">
+            <!-- Imagen Porcinos -->
+            <div class="lg:col-span-5 overflow-hidden rounded-xl bg-stone-200">
+              <img 
+                src="assets/porcino2.jpg" 
+                alt="Comedero y cerdos en granja" 
+                class="w-full h-64 sm:h-72 object-cover filter saturate-[0.95] hover:scale-102 transition duration-500"
+              >
+            </div>
+            <!-- Contenido Porcinos -->
+            <div class="lg:col-span-7 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono tracking-wider uppercase text-siba-moss bg-siba-moss/10 px-2.5 py-0.5 rounded-full font-semibold">
+                  EBA Porcinos 3.0 · ICA
+                </span>
+                <span class="text-xs text-siba-muted">Ceba, Gestación y Cría</span>
+              </div>
+
+              <h3 class="font-editorial text-2xl sm:text-3xl text-siba-forest font-normal">Línea Porcina</h3>
+              <p class="text-xs sm:text-sm text-siba-charcoal leading-relaxed font-light">
+                Inspección de comederos tipo tolva sin alimento fermentado, bebederos tipo chupón a 45° con caudal constante de 1.5 a 2.0 L/min, y evaluación de estrés térmico (jadeo) bajo la <strong>Resolución 136 de 2020</strong>.
+              </p>
+
+              <!-- Métricas clave porcinas -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Comederos Limpios</span>
+                  <span class="font-editorial text-xl text-siba-forest">72%</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Bebederos Chupón</span>
+                  <span class="font-editorial text-xl text-siba-forest">1.6 L/m</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Condición Corporal</span>
+                  <span class="font-editorial text-xl text-siba-forest">3.0 / 5</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Espacio / Animal</span>
+                  <span class="font-editorial text-xl text-siba-forest">0.9 m²</span>
+                </div>
+              </div>
+
+              <div class="pt-2 flex items-center justify-between text-xs">
+                <span class="text-siba-muted">Último registro: <strong class="text-siba-forest font-medium">Lote Ceba P-04 (Corral 3)</strong></span>
+                <button onclick="filterBySpecies('Porcinos')" class="text-siba-forest hover:text-siba-deep font-semibold underline underline-offset-4 flex items-center gap-1">
+                  Ver auditorías porcinas <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOQUE 2: AVES DE POSTURA -->
+          <div id="aves" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-2xl bg-siba-parchment border border-siba-hairline p-6 lg:p-8">
+            <!-- Contenido Aves -->
+            <div class="lg:col-span-7 space-y-4 order-2 lg:order-1">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono tracking-wider uppercase text-amber-800 bg-amber-100/70 px-2.5 py-0.5 rounded-full font-semibold">
+                  Resolución 253 / 2020 · Fenavi
+                </span>
+                <span class="text-xs text-siba-muted">Ponedoras en Piso y Pastoreo</span>
+              </div>
+
+              <h3 class="font-editorial text-2xl sm:text-3xl text-siba-forest font-normal">Aves de Postura</h3>
+              <p class="text-xs sm:text-sm text-siba-charcoal leading-relaxed font-light">
+                Control de disponibilidad y confort en nidales (1 por cada 5 aves), líneas de niple con copa sin fugas, calidad de cama de viruta seca y evaluación de cobertura de plumaje sin canibalismo ni picaje severo.
+              </p>
+
+              <!-- Métricas clave aves -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Plumaje Intacto</span>
+                  <span class="font-editorial text-xl text-siba-forest">96%</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Relación Nidos</span>
+                  <span class="font-editorial text-xl text-siba-forest">1 : 4.8</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Niples con Copa</span>
+                  <span class="font-editorial text-xl text-siba-forest">100%</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-siba-hairline">
+                  <span class="text-[10px] uppercase text-siba-muted block">Temperatura Galpón</span>
+                  <span class="font-editorial text-xl text-siba-forest">24 °C</span>
+                </div>
+              </div>
+
+              <div class="pt-2 flex items-center justify-between text-xs">
+                <span class="text-siba-muted">Último registro: <strong class="text-siba-forest font-medium">Galpón Pon-01 (Naves)</strong></span>
+                <button onclick="filterBySpecies('Aves')" class="text-siba-forest hover:text-siba-deep font-semibold underline underline-offset-4 flex items-center gap-1">
+                  Ver auditorías avícolas <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Imagen Aves -->
+            <div class="lg:col-span-5 overflow-hidden rounded-xl bg-stone-200 order-1 lg:order-2">
+              <img 
+                src="assets/aves1.png" 
+                alt="Gallinas ponedoras en granja" 
+                class="w-full h-64 sm:h-72 object-cover filter saturate-[0.95] hover:scale-102 transition duration-500"
+              >
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- SECCIÓN 3: DIARIO DE CAMPO (REGISTRO EDITORIAL DE AUDITORÍAS)         -->
+      <!-- ===================================================================== -->
+      <section id="diario" class="p-6 md:p-12 hairline-b bg-siba-parchment">
+        <div class="max-w-6xl mx-auto space-y-6">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <span class="text-[11px] uppercase tracking-widest text-siba-moss font-semibold">Trazabilidad en Granja</span>
+              <h2 class="font-editorial text-3xl sm:text-4xl text-siba-forest font-normal mt-1">Diario de Campo</h2>
+              <p class="text-xs text-siba-muted mt-1 font-light">
+                Auditorías capturadas con tolerancia a desconexión mediante SQLite y sincronizadas a la nube.
+              </p>
+            </div>
+
+            <!-- Filtros Minimalistas Inline -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="filterBySpecies('ALL')" id="filterBtnAll" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-siba-forest text-white transition">
+                Todos
+              </button>
+              <button onclick="filterBySpecies('Porcinos')" id="filterBtnPorc" class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-siba-hairline text-siba-charcoal hover:bg-stone-50 transition">
+                Porcinos
+              </button>
+              <button onclick="filterBySpecies('Aves')" id="filterBtnAves" class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-siba-hairline text-siba-charcoal hover:bg-stone-50 transition">
+                Aves de Postura
+              </button>
+              <button onclick="filterAlertsOnly()" id="filterBtnAlerts" class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-siba-hairline text-siba-terracotta hover:bg-red-50 transition">
+                Solo Alertas
+              </button>
+            </div>
+          </div>
+
+          <!-- Buscador Sutil -->
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-siba-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
             <input 
               type="text" 
               id="searchInput" 
               onkeyup="filterAudits()" 
-              placeholder="Buscar por lote, corral o evaluador..." 
-              class="w-full pl-9 pr-3 py-2 text-xs bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-campo-600 focus:outline-none shadow-inner"
+              placeholder="Buscar por lote, galpón, corral o nombre del evaluador..." 
+              class="w-full pl-10 pr-4 py-2.5 text-xs bg-white border border-siba-hairline rounded-xl focus:outline-none focus:border-siba-moss transition text-siba-charcoal placeholder-stone-400"
             >
           </div>
 
-          <select id="speciesFilter" onchange="filterAudits()" class="text-xs bg-white border border-stone-300 rounded-xl px-3 py-2 font-semibold text-stone-700 focus:ring-2 focus:ring-campo-600 focus:outline-none">
-            <option value="ALL">Todas las Especies</option>
-            <option value="Porcinos">🐷 Porcinos</option>
-            <option value="Aves">🐔 Aves de Postura</option>
-          </select>
+          <!-- Contenedor de la Lista Editorial -->
+          <div class="bg-white rounded-2xl border border-siba-hairline overflow-hidden">
+            
+            <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-3.5 hairline-b bg-stone-50 text-[11px] font-semibold text-siba-muted uppercase tracking-wider">
+              <div class="col-span-3">Fecha & Hora</div>
+              <div class="col-span-3">Especie & Ubicación</div>
+              <div class="col-span-2">Evaluador</div>
+              <div class="col-span-2 text-center">Calificación</div>
+              <div class="col-span-2 text-right">Acción</div>
+            </div>
 
-          <select id="levelFilter" onchange="filterAudits()" class="text-xs bg-white border border-stone-300 rounded-xl px-3 py-2 font-semibold text-stone-700 focus:ring-2 focus:ring-campo-600 focus:outline-none">
-            <option value="ALL">Todos los Niveles</option>
-            <option value="Excelente">Excelente (80-100)</option>
-            <option value="Bueno">Bueno (60-79)</option>
-            <option value="Regular">Regular (40-59)</option>
-            <option value="Crítico">Crítico (&lt;40)</option>
-          </select>
+            <!-- Lista de Filas Inyectadas por JS -->
+            <div id="evaluationsList" class="divide-y divide-siba-hairline">
+              <!-- Filas dinámicas -->
+            </div>
+
+            <!-- Pie del Diario -->
+            <div class="px-6 py-4 bg-stone-50 hairline-t flex flex-col sm:flex-row items-center justify-between text-xs text-siba-muted gap-2">
+              <span id="listCounterText">Cargando registros...</span>
+              <button onclick="exportToExcel()" class="font-semibold text-siba-forest hover:text-siba-deep flex items-center gap-1.5 underline underline-offset-4">
+                <i data-lucide="sheet" class="w-3.5 h-3.5 text-emerald-600"></i>
+                Descargar registro en Excel (.xlsx)
+              </button>
+            </div>
+
+          </div>
 
         </div>
+      </section>
 
-      </div>
+      <!-- ===================================================================== -->
+      <!-- SECCIÓN 4: ATENCIÓN PRIORITARIA (ALERTAS VETERINARIAS DE CAMPO)       -->
+      <!-- ===================================================================== -->
+      <section id="alertas" class="p-6 md:p-12 hairline-b bg-white">
+        <div class="max-w-6xl mx-auto space-y-6">
+          
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-siba-terracotta/10 text-siba-terracotta flex items-center justify-center font-bold">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            </span>
+            <div>
+              <span class="text-[11px] uppercase tracking-widest text-siba-terracotta font-semibold">Intervención Requerida</span>
+              <h2 class="font-editorial text-2xl sm:text-3xl text-siba-forest font-normal">Atención Prioritaria en Granja</h2>
+            </div>
+          </div>
 
-      <!-- Tabla -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-stone-600">
-          <thead class="bg-stone-100/90 text-stone-700 uppercase font-bold tracking-wider border-b border-stone-200">
-            <tr>
-              <th class="py-3.5 px-4">Fecha / Hora</th>
-              <th class="py-3.5 px-4">Evaluador (Código)</th>
-              <th class="py-3.5 px-4">Especie & Ubicación</th>
-              <th class="py-3.5 px-4">Lote Auditado</th>
-              <th class="py-3.5 px-4 text-center">Recursos</th>
-              <th class="py-3.5 px-4 text-center">Salud Animal</th>
-              <th class="py-3.5 px-4 text-center">Gestión</th>
-              <th class="py-3.5 px-4 text-center">Puntaje Final</th>
-              <th class="py-3.5 px-4 text-center">Semáforo</th>
-              <th class="py-3.5 px-4 text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="evaluationsTableBody" class="divide-y divide-stone-200/80 bg-white">
-            <!-- Filas inyectadas por JS -->
-          </tbody>
-        </table>
-      </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Alerta 1: Cerdos Levante -->
+            <div class="p-5 rounded-2xl bg-siba-parchment border-l-4 border-siba-terracotta border border-siba-hairline space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-siba-terracotta uppercase tracking-wide text-[10px] bg-red-100/70 px-2 py-0.5 rounded">
+                  Alerta Crítica · Estrés Calórico
+                </span>
+                <span class="text-siba-muted font-mono text-[11px]">04 Nov 2026, 15:40</span>
+              </div>
+              <div>
+                <h4 class="font-editorial text-lg text-siba-forest">Corral 5 · Lote Ceba Levante P-02</h4>
+                <p class="text-xs text-siba-charcoal mt-1 leading-relaxed font-light">
+                  Temperatura ambiental de 33°C al mediodía con más del 25% de cerdos en respiración jadeante acelerada. Bebederos con obstrucción por fango.
+                </p>
+              </div>
+              <div class="pt-2 hairline-t flex items-center justify-between text-xs">
+                <span class="text-siba-muted">Dictamen: <strong class="text-red-700">38.0 / 100 pts</strong></span>
+                <button onclick="openDetailModal('AUD-UFPSO-2026-003')" class="font-semibold text-siba-forest hover:underline">
+                  Ver evaluación completa →
+                </button>
+              </div>
+            </div>
 
-      <!-- Pie de Tabla -->
-      <div class="p-4 bg-stone-50 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-2">
-        <div class="flex items-center gap-2">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Sincronización en segundo plano activa con SQLite local en dispositivos móviles</span>
+            <!-- Alerta 2: Cerdos Ceba Tolvas -->
+            <div class="p-5 rounded-2xl bg-siba-parchment border-l-4 border-amber-600 border border-siba-hairline space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-amber-800 uppercase tracking-wide text-[10px] bg-amber-100/70 px-2 py-0.5 rounded">
+                  Observación · Comederos
+                </span>
+                <span class="text-siba-muted font-mono text-[11px]">05 Nov 2026, 10:48</span>
+              </div>
+              <div>
+                <h4 class="font-editorial text-lg text-siba-forest">Corral 3 · Lote Ceba P-04</h4>
+                <p class="text-xs text-siba-charcoal mt-1 leading-relaxed font-light">
+                  Tolvas con alimento adherido y signos de fermentación en esquinas internas. Chupón #2 con caudal reducido (&lt;1.2 L/min).
+                </p>
+              </div>
+              <div class="pt-2 hairline-t flex items-center justify-between text-xs">
+                <span class="text-siba-muted">Dictamen: <strong class="text-amber-800">52.5 / 100 pts</strong></span>
+                <button onclick="openDetailModal('AUD-UFPSO-2026-001')" class="font-semibold text-siba-forest hover:underline">
+                  Ver evaluación completa →
+                </button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
-        <button onclick="exportToExcel()" class="text-xs font-bold text-campo-700 hover:text-campo-900 underline flex items-center gap-1">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          Descargar Sábana Oficial en Excel
-        </button>
-      </div>
+      </section>
 
-    </div>
+      <!-- ===================================================================== -->
+      <!-- SECCIÓN 5: PIE DE PÁGINA EDITORIAL & PROPÓSITO                        -->
+      <!-- ===================================================================== -->
+      <footer class="bg-siba-deep text-stone-300 pt-12 pb-8 px-6 md:px-12 mt-auto">
+        <div class="max-w-6xl mx-auto space-y-8">
+          
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            
+            <div class="md:col-span-6 space-y-3">
+              <div class="flex items-center space-x-3">
+                <img src="assets/icono.png" alt="SIBA" class="w-8 h-8 object-contain">
+                <span class="font-editorial text-2xl text-white font-normal">SIBA · Bienestar Animal</span>
+              </div>
+              <p class="font-editorial text-lg text-stone-200 italic max-w-lg leading-snug">
+                “La tecnología al servicio del bienestar de los animales y la sostenibilidad del campo colombiano.”
+              </p>
+              <p class="text-xs text-stone-400 font-light leading-relaxed">
+                Plataforma de auditoría digital desarrollada para la Granja Experimental de la Universidad Francisco de Paula Santander Ocaña (UFPSO). Proyecto de investigación zootécnica y de ingeniería.
+              </p>
+            </div>
 
-  </main>
+            <div class="md:col-span-3 space-y-2 text-xs">
+              <span class="text-[10px] uppercase tracking-wider text-siba-sage font-semibold block">Marco Regulatorio</span>
+              <ul class="space-y-1.5 text-stone-300">
+                <li><a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000136%20de%202020.pdf" target="_blank" class="hover:text-white transition underline">Res. 136 de 2020 (Porcinos)</a></li>
+                <li><a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000253%20de%202020.pdf" target="_blank" class="hover:text-white transition underline">Res. 253 de 2020 (Aves)</a></li>
+                <li><a href="https://www.ica.gov.co/noticias/ica-metodologia-evaluacion-bienestar-porcino" target="_blank" class="hover:text-white transition underline">Metodología EBA Porcinos 3.0</a></li>
+                <li><a href="https://fenavi.org/wp-content/uploads/2021/03/Cartilla-Bienestar-Animal-Aves-Postura.pdf" target="_blank" class="hover:text-white transition underline">Cartilla Fenavi / ICA</a></li>
+              </ul>
+            </div>
+
+            <div class="md:col-span-3 space-y-2 text-xs">
+              <span class="text-[10px] uppercase tracking-wider text-siba-sage font-semibold block">Créditos de Investigación</span>
+              <p class="text-stone-300 font-medium">Javier Mauricio Serna Osorio (0192546)</p>
+              <p class="text-stone-300 font-medium">Juan Manuel Garrido Amaya (0192544)</p>
+              <p class="text-stone-400 text-[11px]">Facultad de Ingenierías · Grupo GRIITEM</p>
+              
+              <!-- Botón discreto de simulación técnica en el footer -->
+              <div class="pt-2">
+                <button onclick="simulateMobileUpload()" class="text-[11px] text-stone-400 hover:text-siba-sage underline flex items-center gap-1">
+                  <i data-lucide="smartphone" class="w-3 h-3"></i>
+                  <span>Simular recepción APK móvil</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="pt-6 border-t border-siba-forest flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-400 gap-2">
+            <span>© 2026 SIBA · Versión 2.4.0 (Editorial Edition)</span>
+            <span>Ocaña, Norte de Santander · Colombia</span>
+          </div>
+
+        </div>
+      </footer>
+
+    </main>
+  </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: FICHA TÉCNICA DETALLADA CON FOTOS REALES DE CORRALES Y GALPONES     -->
+  <!-- MODAL EDITORIAL: FICHA TÉCNICA CON EVIDENCIAS FOTOGRÁFICAS DE CAMPO       -->
   <!-- ========================================================================= -->
   <div id="detailModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-stone-300 overflow-hidden">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-siba-hairline overflow-hidden">
       
       <!-- Cabecera Modal -->
-      <div class="p-6 bg-campo-900 text-white flex items-center justify-between">
+      <div class="p-6 hairline-b bg-siba-forest text-white flex items-center justify-between">
         <div class="flex items-center space-x-3.5">
-          <div id="modalIcon" class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-2xl">
+          <div id="modalIcon" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">
             🐷
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 id="modalTitle" class="text-lg font-display font-bold text-white">Auditoría Lote Ceba P-04</h3>
-              <span id="modalLevelBadge" class="text-xs px-2.5 py-0.5 rounded-md font-bold badge-regular">Regular</span>
+              <h3 id="modalTitle" class="font-editorial text-xl text-white">Auditoría Lote Ceba P-04</h3>
+              <span id="modalLevelBadge" class="text-[11px] px-2.5 py-0.5 rounded-full font-semibold pill-regular">Regular</span>
             </div>
-            <p id="modalSubtitle" class="text-xs text-campo-200 mt-0.5">Corral 3 · Evaluador: Javier Mauricio Serna (0192546)</p>
+            <p id="modalSubtitle" class="text-xs text-siba-sage mt-0.5">Corral 3 · Evaluador: Javier Mauricio Serna (0192546)</p>
           </div>
         </div>
 
-        <button onclick="closeDetailModal()" class="text-campo-200 hover:text-white p-2 rounded-xl hover:bg-white/10 transition">
+        <button onclick="closeDetailModal()" class="text-stone-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- Cuerpo del Modal -->
-      <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-stone-50">
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-siba-parchment">
         
         <!-- Puntuación por Categorías -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
-          <div class="text-center p-2 rounded-xl bg-stone-50 border border-stone-100">
-            <span class="text-[10px] uppercase font-bold text-stone-400 block">Recursos</span>
-            <span id="modalRecursosScore" class="text-base font-display font-extrabold text-stone-800">55.0%</span>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white p-4 rounded-xl border border-siba-hairline">
+          <div class="text-center p-2 rounded-lg bg-stone-50">
+            <span class="text-[10px] uppercase font-bold text-siba-muted block">Recursos</span>
+            <span id="modalRecursosScore" class="font-editorial text-xl font-normal text-siba-forest">55.0%</span>
           </div>
-          <div class="text-center p-2 rounded-xl bg-stone-50 border border-stone-100">
-            <span class="text-[10px] uppercase font-bold text-stone-400 block">Salud Animal</span>
-            <span id="modalAnimalScore" class="text-base font-display font-extrabold text-stone-800">77.5%</span>
+          <div class="text-center p-2 rounded-lg bg-stone-50">
+            <span class="text-[10px] uppercase font-bold text-siba-muted block">Salud Animal</span>
+            <span id="modalAnimalScore" class="font-editorial text-xl font-normal text-siba-forest">77.5%</span>
           </div>
-          <div class="text-center p-2 rounded-xl bg-stone-50 border border-stone-100">
-            <span class="text-[10px] uppercase font-bold text-stone-400 block">Gestión</span>
-            <span id="modalGestionScore" class="text-base font-display font-extrabold text-stone-800">80.0%</span>
+          <div class="text-center p-2 rounded-lg bg-stone-50">
+            <span class="text-[10px] uppercase font-bold text-siba-muted block">Gestión</span>
+            <span id="modalGestionScore" class="font-editorial text-xl font-normal text-siba-forest">80.0%</span>
           </div>
-          <div class="text-center p-2 rounded-xl bg-campo-50 border border-campo-200">
-            <span class="text-[10px] uppercase font-bold text-campo-700 block">Índice Global</span>
-            <span id="modalGlobalScore" class="text-lg font-display font-extrabold text-campo-800">52.5 pts</span>
+          <div class="text-center p-2 rounded-lg bg-siba-forest text-white">
+            <span class="text-[10px] uppercase font-bold text-siba-sage block">Índice Global</span>
+            <span id="modalGlobalScore" class="font-editorial text-xl font-normal text-white">52.5 pts</span>
           </div>
         </div>
 
-        <!-- Evidencias Fotográficas de Campo -->
+        <!-- Evidencias Fotográficas in situ -->
         <div>
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-display font-bold uppercase tracking-wider text-stone-700 flex items-center gap-1.5">
-              <i data-lucide="camera" class="w-4 h-4 text-arcilla-500"></i>
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-siba-forest flex items-center gap-1.5">
+              <i data-lucide="camera" class="w-4 h-4 text-siba-moss"></i>
               <span>Evidencias Fotográficas in situ (Comederos, Bebederos y Animales)</span>
             </h4>
-            <span class="text-[11px] text-stone-400 font-medium">Capturadas con la cámara del dispositivo móvil</span>
+            <span class="text-[11px] text-siba-muted">Capturadas con la cámara del dispositivo móvil</span>
           </div>
 
           <div id="modalIndicatorsList" class="space-y-3">
@@ -500,12 +697,12 @@
         </div>
 
         <!-- Dictamen Oficial -->
-        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-campo-800 flex items-center gap-1.5">
-            <i data-lucide="file-check" class="w-4 h-4"></i>
+        <div class="bg-white p-4 rounded-xl border border-siba-hairline">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-siba-forest flex items-center gap-1.5">
+            <i data-lucide="file-check" class="w-4 h-4 text-siba-moss"></i>
             Dictamen Técnico Zootécnico:
           </span>
-          <p id="modalDictamen" class="text-xs text-stone-700 mt-1.5 leading-relaxed font-medium">
+          <p id="modalDictamen" class="text-xs text-siba-charcoal mt-1.5 leading-relaxed font-light">
             Cumple parcialmente con la Resolución 136 de 2020.
           </p>
         </div>
@@ -513,12 +710,12 @@
       </div>
 
       <!-- Pie del Modal -->
-      <div class="p-4 bg-white border-t border-stone-200 flex items-center justify-between">
-        <button onclick="downloadSingleExcel()" class="flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl shadow transition">
-          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+      <div class="p-4 bg-white hairline-t flex items-center justify-between">
+        <button onclick="downloadSingleExcel()" class="flex items-center gap-1.5 text-xs font-semibold text-white bg-siba-forest hover:bg-siba-deep px-4 py-2 rounded-xl transition">
+          <i data-lucide="sheet" class="w-4 h-4"></i>
           <span>Descargar Ficha en Excel</span>
         </button>
-        <button onclick="closeDetailModal()" class="text-xs font-bold text-stone-600 hover:bg-stone-100 px-4 py-2 rounded-xl transition">
+        <button onclick="closeDetailModal()" class="text-xs font-semibold text-siba-charcoal hover:bg-stone-100 px-4 py-2 rounded-xl transition">
           Cerrar
         </button>
       </div>
@@ -527,18 +724,18 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: BIBLIOTECA NORMATIVA OFICIAL EN LÍNEA (PDFs VERIFICADOS)           -->
+  <!-- MODAL: BIBLIOTECA NORMATIVA OFICIAL EN LÍNEA                             -->
   <!-- ========================================================================= -->
   <div id="normativaModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-stone-300 max-h-[90vh] flex flex-col">
-      <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-siba-hairline max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 hairline-b">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-arcilla-50 text-arcilla-600 flex items-center justify-center font-bold text-xl">
+          <div class="w-10 h-10 rounded-xl bg-siba-parchment text-siba-moss flex items-center justify-center text-xl">
             📜
           </div>
           <div>
-            <h3 class="font-display font-bold text-base text-stone-900">Normativa Oficial ICA y MinAgricultura (PDF)</h3>
-            <p class="text-xs text-stone-500">Documentos regulatorios vigentes en Colombia</p>
+            <h3 class="font-editorial text-xl text-siba-forest">Normativa Oficial ICA y MinAgricultura</h3>
+            <p class="text-xs text-siba-muted">Documentos regulatorios vigentes en Colombia</p>
           </div>
         </div>
         <button onclick="closeNormativaModal()" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100">
@@ -549,79 +746,65 @@
       <div class="py-4 overflow-y-auto space-y-3 flex-1 text-xs">
         
         <!-- Resolución 136 -->
-        <a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000136%20de%202020.pdf" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-campo-50 rounded-2xl border border-stone-200 transition group">
+        <a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000136%20de%202020.pdf" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline transition group">
           <div class="flex items-center gap-3">
-            <span class="text-xl">🐷</span>
+            <span class="text-lg">🐷</span>
             <div>
-              <p class="font-bold text-stone-800 group-hover:text-campo-800 text-sm">Resolución 136 de 2020 — MinAgricultura</p>
-              <p class="text-[11px] text-stone-500">Manual de condiciones de bienestar animal para porcinos en Colombia</p>
+              <p class="font-semibold text-siba-forest text-xs sm:text-sm">Resolución 136 de 2020 — MinAgricultura</p>
+              <p class="text-[11px] text-siba-muted">Manual de bienestar animal para la especie porcina</p>
             </div>
           </div>
-          <span class="text-campo-700 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-            Abrir PDF <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="text-siba-moss font-semibold flex items-center gap-1 group-hover:translate-x-1 transition">
+            PDF <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           </span>
         </a>
 
         <!-- Metodología EBA Porcinos -->
-        <a href="https://www.ica.gov.co/noticias/ica-metodologia-evaluacion-bienestar-porcino" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-campo-50 rounded-2xl border border-stone-200 transition group">
+        <a href="https://www.ica.gov.co/noticias/ica-metodologia-evaluacion-bienestar-porcino" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline transition group">
           <div class="flex items-center gap-3">
-            <span class="text-xl">📋</span>
+            <span class="text-lg">📋</span>
             <div>
-              <p class="font-bold text-stone-800 group-hover:text-campo-800 text-sm">Metodología EBA Porcinos 3.0 — ICA & Porkcolombia</p>
-              <p class="text-[11px] text-stone-500">Protocolo de rúbricas de campo para comederos, bebederos y confort</p>
+              <p class="font-semibold text-siba-forest text-xs sm:text-sm">Metodología EBA Porcinos 3.0 — ICA</p>
+              <p class="text-[11px] text-siba-muted">Protocolo de rúbricas para comederos, bebederos y salud</p>
             </div>
           </div>
-          <span class="text-campo-700 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-            Abrir Portal ICA <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="text-siba-moss font-semibold flex items-center gap-1 group-hover:translate-x-1 transition">
+            Portal ICA <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           </span>
         </a>
 
         <!-- Resolución 253 Aves -->
-        <a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000253%20de%202020.pdf" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-campo-50 rounded-2xl border border-stone-200 transition group">
+        <a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000253%20de%202020.pdf" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline transition group">
           <div class="flex items-center gap-3">
-            <span class="text-xl">🐔</span>
+            <span class="text-lg">🐔</span>
             <div>
-              <p class="font-bold text-stone-800 group-hover:text-campo-800 text-sm">Resolución 253 de 2020 — Aves de Postura</p>
-              <p class="text-[11px] text-stone-500">Directrices técnicas para gallinas ponedoras y producción de huevo</p>
+              <p class="font-semibold text-siba-forest text-xs sm:text-sm">Resolución 253 de 2020 — Aves de Postura</p>
+              <p class="text-[11px] text-siba-muted">Directrices técnicas para gallinas ponedoras</p>
             </div>
           </div>
-          <span class="text-campo-700 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-            Abrir PDF <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="text-siba-moss font-semibold flex items-center gap-1 group-hover:translate-x-1 transition">
+            PDF <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           </span>
         </a>
 
         <!-- Cartilla Fenavi -->
-        <a href="https://fenavi.org/wp-content/uploads/2021/03/Cartilla-Bienestar-Animal-Aves-Postura.pdf" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-campo-50 rounded-2xl border border-stone-200 transition group">
+        <a href="https://fenavi.org/wp-content/uploads/2021/03/Cartilla-Bienestar-Animal-Aves-Postura.pdf" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline transition group">
           <div class="flex items-center gap-3">
-            <span class="text-xl">🥚</span>
+            <span class="text-lg">🥚</span>
             <div>
-              <p class="font-bold text-stone-800 group-hover:text-campo-800 text-sm">Cartilla Bienestar Avícola — Fenavi & ICA</p>
-              <p class="text-[11px] text-stone-500">Manual práctico de nidos, bebederos de niple y ventilación</p>
+              <p class="font-semibold text-siba-forest text-xs sm:text-sm">Cartilla Fenavi & ICA — Bienestar Avícola</p>
+              <p class="text-[11px] text-siba-muted">Manual práctico de nidos, bebederos y ventilación</p>
             </div>
           </div>
-          <span class="text-campo-700 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-            Abrir PDF <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-          </span>
-        </a>
-
-        <!-- Ley 1774 -->
-        <a href="https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=64444" target="_blank" class="flex items-center justify-between p-3.5 bg-stone-50 hover:bg-campo-50 rounded-2xl border border-stone-200 transition group">
-          <div class="flex items-center gap-3">
-            <span class="text-xl">⚖️</span>
-            <div>
-              <p class="font-bold text-stone-800 group-hover:text-campo-800 text-sm">Ley 1774 de 2016 — Animales Seres Sintientes</p>
-              <p class="text-[11px] text-stone-500">Marco de protección animal en Colombia y prevención del sufrimiento</p>
-            </div>
-          </div>
-          <span class="text-campo-700 font-bold flex items-center gap-1 group-hover:translate-x-1 transition">
-            Ver Ley <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="text-siba-moss font-semibold flex items-center gap-1 group-hover:translate-x-1 transition">
+            PDF <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
           </span>
         </a>
 
       </div>
 
-      <div class="pt-3 border-t border-stone-200 flex justify-end">
-        <button onclick="closeNormativaModal()" class="px-4 py-2 bg-stone-200 hover:bg-stone-300 rounded-xl text-xs font-bold text-stone-700 transition">
+      <div class="pt-3 hairline-t flex justify-end">
+        <button onclick="closeNormativaModal()" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-semibold text-siba-charcoal transition">
           Cerrar
         </button>
       </div>
@@ -629,68 +812,67 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: CONFIGURACIÓN DE NUBE (SUPABASE)                                   -->
+  <!-- MODAL: CONFIGURACIÓN DE SUPABASE CLOUD & SIMULADOR                       -->
   <!-- ========================================================================= -->
   <div id="configModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-300">
-      <div class="flex items-center justify-between mb-3">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-siba-hairline space-y-4">
+      <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="text-2xl">⚡</span>
-          <h3 class="font-display font-bold text-stone-900 text-base">Conexión a Supabase Cloud</h3>
+          <span class="text-xl">⚡</span>
+          <h3 class="font-editorial text-xl text-siba-forest">Conexión a Supabase Cloud</h3>
         </div>
         <button onclick="closeConfigModal()" class="text-stone-400 hover:text-stone-600">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <p class="text-xs text-stone-500 mb-4">
-        Conecta este panel con tu proyecto gratuito de Supabase para que las evaluaciones hechas en el APK de Android se sincronicen en PostgreSQL.
+      <p class="text-xs text-siba-muted leading-relaxed">
+        Sincroniza en tiempo real las evaluaciones tomadas en el aplicativo móvil Android cuando tenga cobertura a internet.
       </p>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-stone-700 mb-1">Supabase Project URL:</label>
-          <input type="text" id="cfgSupabaseUrl" placeholder="https://tu-proyecto.supabase.co" class="w-full p-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-campo-600 focus:outline-none font-mono text-[11px]">
+          <label class="block font-semibold text-siba-forest mb-1">Supabase Project URL:</label>
+          <input type="text" id="cfgSupabaseUrl" placeholder="https://tu-proyecto.supabase.co" class="w-full p-2.5 bg-stone-50 border border-siba-hairline rounded-xl focus:border-siba-moss focus:outline-none font-mono text-[11px]">
         </div>
         <div>
-          <label class="block font-bold text-stone-700 mb-1">Supabase Anon Key:</label>
-          <input type="password" id="cfgSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="w-full p-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-campo-600 focus:outline-none font-mono text-[11px]">
+          <label class="block font-semibold text-siba-forest mb-1">Supabase Anon Key:</label>
+          <input type="password" id="cfgSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="w-full p-2.5 bg-stone-50 border border-siba-hairline rounded-xl focus:border-siba-moss focus:outline-none font-mono text-[11px]">
         </div>
       </div>
 
-      <div class="mt-5 pt-3 border-t border-stone-100 flex items-center justify-between">
-        <button onclick="useLocalDemoData()" class="text-xs text-campo-700 font-bold underline">
-          Restaurar Datos Granja UFPSO
+      <!-- Simulador discreto aquí dentro -->
+      <div class="p-3 bg-siba-parchment rounded-xl border border-siba-hairline text-xs">
+        <span class="font-semibold text-siba-forest block mb-1">Herramienta de Simulación de Campo:</span>
+        <p class="text-[11px] text-siba-muted mb-2">Simula el reenvío de un registro guardado en SQLite sin internet que luego se sincroniza.</p>
+        <button onclick="simulateMobileUpload(); closeConfigModal();" class="w-full py-2 bg-siba-forest hover:bg-siba-deep text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+          <span>Ejecutar Simulación APK Móvil</span>
+        </button>
+      </div>
+
+      <div class="pt-3 hairline-t flex items-center justify-between">
+        <button onclick="useLocalDemoData()" class="text-xs text-siba-moss font-semibold underline">
+          Restaurar Datos UFPSO
         </button>
         <div class="flex gap-2">
-          <button onclick="closeConfigModal()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-semibold">Cancelar</button>
-          <button onclick="saveSupabaseConfig()" class="px-4 py-1.5 bg-campo-700 hover:bg-campo-800 text-white rounded-xl text-xs font-bold shadow">Guardar</button>
+          <button onclick="closeConfigModal()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-medium">Cancelar</button>
+          <button onclick="saveSupabaseConfig()" class="px-4 py-1.5 bg-siba-forest hover:bg-siba-deep text-white rounded-xl text-xs font-semibold">Guardar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- TOAST DE NOTIFICACIÓN EN TIEMPO REAL -->
-  <div id="syncToast" class="fixed bottom-5 right-5 bg-campo-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-400 flex items-center gap-3 transform translate-y-32 transition-transform duration-300 z-50">
-    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
-      📡
+  <!-- TOAST DE NOTIFICACIÓN SUTIL EN TIEMPO REAL -->
+  <div id="syncToast" class="fixed bottom-6 right-6 bg-siba-deep text-white px-5 py-4 rounded-xl shadow-2xl border border-siba-moss flex items-center gap-3.5 transform translate-y-36 transition-transform duration-300 z-50">
+    <div class="w-8 h-8 rounded-full bg-siba-moss/30 text-emerald-400 flex items-center justify-center font-bold">
+      <i data-lucide="radio" class="w-4 h-4"></i>
     </div>
     <div>
-      <p id="toastTitle" class="text-xs font-bold text-white">¡Nueva Auditoría Recibida!</p>
-      <p id="toastMessage" class="text-[11px] text-campo-200">Sincronizada desde la APK Android en Granja UFPSO.</p>
+      <p id="toastTitle" class="text-xs font-bold text-white">¡Auditoría Recibida!</p>
+      <p id="toastMessage" class="text-[11px] text-stone-300">Sincronizada desde la APK móvil en Granja UFPSO.</p>
     </div>
   </div>
-
-  <!-- FOOTER -->
-  <footer class="bg-white border-t border-stone-200 py-5 mt-auto text-xs text-stone-500">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
-        <img src="assets/icono.png" class="w-5 h-5 object-contain" alt="">
-        <span class="font-bold text-stone-700">SIBA · Universidad Francisco de Paula Santander Ocaña</span>
-      </div>
-      <p class="text-stone-400">Investigadores: Javier Mauricio Serna Osorio & Juan Manuel Garrido Amaya · GRIITEM 2026</p>
-    </div>
-  </footer>
 
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT: LÓGICA DE AUDITORÍAS REALES, EXCEL, SUPABASE Y FOTOS         -->
@@ -700,32 +882,33 @@
     const REAL_FARM_AUDITS = [
       {
         id: "AUD-UFPSO-2026-001",
-        date: "2026-11-05 10:48",
+        date: "14 Nov 2026, 10:48 AM",
         evaluator: "Javier Mauricio Serna Osorio",
         evaluator_code: "0192546",
         species: "Porcinos",
         lot_id: "LOTE-PORC-CEBA-G03",
-        location: "Corral 3 - Sector Ceba (UFPSO)",
+        location: "Corral 3 · Sector Ceba (UFPSO)",
         score_resources: 55.0,
         score_animal: 77.5,
         score_management: 80.0,
         final_score: 52.5,
         level: "Regular",
-        badge_class: "badge-regular",
+        pill_class: "pill-regular",
+        sync_origin: "SQLite Móvil → Nube",
         dictamen: "Nivel Regular (52.5 pts). Cumple parcialmente con la Resolución 136 de 2020. Requiere cambio urgente de chupones obstruidos y raspado de tolvas con alimento fermentado.",
         indicators: [
           {
             name: "Acceso al Agua (flujo en chupones a 45°)",
             score: 55,
             category: "Recursos",
-            photo: "assets/evidencias/screenshot_09.jpg", // Foto real capturada en la app
+            photo: "assets/evidencias/screenshot_09.jpg",
             obs: "Bebedero chupón #2 con flujo inferior a 1.2 L/min por sedimentación. Se requiere desmonte y limpieza de filtro."
           },
           {
             name: "Estado de los Comederos tipo Tolva",
             score: 0,
             category: "Recursos",
-            photo: "assets/porcino2.jpg", // Foto real de comedero en granja
+            photo: "assets/porcino2.jpg",
             obs: "Comedero con alimento húmedo adherido y en fermentación en los ángulos internos. Riesgo de micotoxinas."
           },
           {
@@ -746,25 +929,26 @@
       },
       {
         id: "AUD-UFPSO-2026-002",
-        date: "2026-11-05 09:15",
+        date: "14 Nov 2026, 09:15 AM",
         evaluator: "Juan Manuel Garrido Amaya",
         evaluator_code: "0192544",
         species: "Aves",
         lot_id: "LOTE-AVES-PONEDORAS-01",
-        location: "Galpón 1 - Sector Aves de Postura",
+        location: "Galpón 1 · Sector Aves de Postura",
         score_resources: 92.0,
         score_animal: 95.0,
         score_management: 90.0,
         final_score: 93.7,
         level: "Excelente",
-        badge_class: "badge-excelente",
+        pill_class: "pill-excelente",
+        sync_origin: "APK Android (En línea)",
         dictamen: "Nivel Excelente (93.7 pts). Cumplimiento sobresaliente de la Resolución 253 de 2020. Excelente confort en nidos y calidad de cama.",
         indicators: [
           {
             name: "Disponibilidad y Confort de Nidos",
             score: 100,
             category: "Recursos",
-            photo: "assets/aves1.png", // Foto real de nidal y aves
+            photo: "assets/aves1.png",
             obs: "Relación de 1 nido por cada 4.8 aves. Cama de viruta de madera desinfectada, seca y esponjosa."
           },
           {
@@ -792,25 +976,26 @@
       },
       {
         id: "AUD-UFPSO-2026-003",
-        date: "2026-11-04 15:40",
+        date: "13 Nov 2026, 15:40 PM",
         evaluator: "Operario Campo Porcinos",
         evaluator_code: "OP-002",
         species: "Porcinos",
         lot_id: "LOTE-PORC-LEVANTE-02",
-        location: "Corral 5 - Sector Levante (UFPSO)",
+        location: "Corral 5 · Sector Levante (UFPSO)",
         score_resources: 35.0,
         score_animal: 40.0,
         score_management: 45.0,
         final_score: 38.0,
         level: "Crítico",
-        badge_class: "badge-critico",
+        pill_class: "pill-critico",
+        sync_origin: "SQLite Móvil (Re-sincronizado)",
         dictamen: "Nivel Crítico (38.0 pts). ¡ALERTA VETERINARIA INMEDIATA! Estrés calórico con jadeo severo en lechones de levante y falta de enriquecimiento ambiental.",
         indicators: [
           {
             name: "Ventilación y Confort Térmico (Jadeo)",
             score: 20,
             category: "Recursos",
-            photo: "assets/porcino1.jpg", // Foto real cerdos en calor
+            photo: "assets/porcino1.jpg",
             obs: "Temperatura de 33°C en el corral al mediodía. Más del 25% de animales con respiración jadeante acelerada."
           },
           {
@@ -831,18 +1016,19 @@
       },
       {
         id: "AUD-UFPSO-2026-004",
-        date: "2026-11-03 11:20",
+        date: "12 Nov 2026, 11:20 AM",
         evaluator: "Javier Mauricio Serna Osorio",
         evaluator_code: "0192546",
         species: "Aves",
         lot_id: "LOTE-AVES-LEVANTE-02",
-        location: "Galpón 2 - Pollitas de Reemplazo",
+        location: "Galpón 2 · Pollitas de Reemplazo",
         score_resources: 80.0,
         score_animal: 85.0,
         score_management: 80.0,
         final_score: 82.5,
         level: "Bueno",
-        badge_class: "badge-bueno",
+        pill_class: "pill-bueno",
+        sync_origin: "APK Android (En línea)",
         dictamen: "Nivel Bueno (82.5 pts). Lote con desarrollo adecuado de peso y uniformidad de lote en reemplazo.",
         indicators: [
           {
@@ -865,120 +1051,174 @@
 
     let currentAudits = [...REAL_FARM_AUDITS];
     let selectedAudit = null;
+    let activeSpeciesFilter = 'ALL';
+    let alertsOnly = false;
 
     // INICIALIZACIÓN
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      renderTable(currentAudits);
+      renderList(currentAudits);
       updateKPIs();
       listenSupabaseIfConfigured();
+
+      // Formato fecha actual en español
+      try {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-CO', options);
+        const capitalized = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        document.getElementById('currentDateHeader').innerText = `${capitalized} · Granja Experimental UFPSO`;
+      } catch (e) {}
     });
 
-    // RENDERIZADO DE TABLA
-    function renderTable(audits) {
-      const tbody = document.getElementById('evaluationsTableBody');
-      tbody.innerHTML = '';
+    // RENDERIZADO EDITORIAL DE LA LISTA
+    function renderList(audits) {
+      const container = document.getElementById('evaluationsList');
+      container.innerHTML = '';
 
       if (audits.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="10" class="py-12 text-center text-stone-400">
-              <span class="text-3xl block mb-2">🔍</span>
-              <p class="font-bold text-stone-600">No se encontraron auditorías con los filtros seleccionados.</p>
-              <button onclick="filterBySpecies('ALL')" class="mt-2 text-xs text-campo-700 underline font-bold">Ver todas las auditorías</button>
-            </td>
-          </tr>
+        container.innerHTML = `
+          <div class="py-12 text-center text-siba-muted">
+            <span class="text-3xl block mb-2 font-editorial">Sin registros</span>
+            <p class="text-xs">No se encontraron auditorías con los criterios seleccionados.</p>
+            <button onclick="filterBySpecies('ALL')" class="mt-2 text-xs text-siba-forest underline font-semibold">Ver todas las auditorías</button>
+          </div>
         `;
-        document.getElementById('tableBadgeCount').innerText = "0 auditorías";
+        document.getElementById('listCounterText').innerText = "0 auditorías mostradas";
         return;
       }
 
       audits.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-stone-50/80 transition border-b border-stone-100 group";
-        tr.innerHTML = `
-          <td class="py-3.5 px-4 font-semibold text-stone-800">${item.date}</td>
-          <td class="py-3.5 px-4">
-            <span class="font-bold text-stone-900 block">${item.evaluator}</span>
-            <span class="text-[11px] text-stone-400 font-mono">Cód: ${item.evaluator_code}</span>
-          </td>
-          <td class="py-3.5 px-4">
-            <span class="inline-flex items-center gap-1.5 font-bold ${item.species === 'Porcinos' ? 'text-orange-800' : 'text-amber-800'}">
-              <span>${item.species === 'Porcinos' ? '🐷 Porcinos' : '🐔 Aves Postura'}</span>
+        const row = document.createElement('div');
+        row.className = "px-6 py-4 hover:bg-stone-50/80 transition flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 items-start md:items-center text-xs";
+        
+        row.innerHTML = `
+          <!-- Fecha & Sincronización -->
+          <div class="md:col-span-3">
+            <span class="font-medium text-siba-charcoal block">${item.date}</span>
+            <span class="text-[10px] text-siba-muted font-mono flex items-center gap-1 mt-0.5">
+              <span class="w-1.5 h-1.5 rounded-full ${item.sync_origin.includes('SQLite') ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
+              ${item.sync_origin || 'SQLite Móvil'}
             </span>
-            <span class="text-[11px] text-stone-500 block">${item.location}</span>
-          </td>
-          <td class="py-3.5 px-4 font-mono font-bold text-stone-800">${item.lot_id}</td>
-          <td class="py-3.5 px-4 text-center font-bold text-stone-700">${item.score_resources}%</td>
-          <td class="py-3.5 px-4 text-center font-bold text-stone-700">${item.score_animal}%</td>
-          <td class="py-3.5 px-4 text-center font-bold text-stone-700">${item.score_management}%</td>
-          <td class="py-3.5 px-4 text-center font-display font-extrabold text-sm text-stone-900">${item.final_score}</td>
-          <td class="py-3.5 px-4 text-center">
-            <span class="inline-block px-2.5 py-0.5 rounded-full font-bold text-[11px] ${item.badge_class}">
+          </div>
+
+          <!-- Especie & Ubicación -->
+          <div class="md:col-span-3">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-siba-forest">
+                ${item.species === 'Porcinos' ? '🐷 Porcinos' : '🐔 Aves Postura'}
+              </span>
+              <span class="text-[10px] font-mono text-siba-muted bg-stone-100 px-1.5 py-0.5 rounded">
+                ${item.lot_id}
+              </span>
+            </div>
+            <span class="text-[11px] text-siba-muted block mt-0.5 truncate">${item.location}</span>
+          </div>
+
+          <!-- Evaluador -->
+          <div class="md:col-span-2">
+            <span class="font-medium text-siba-charcoal block truncate">${item.evaluator}</span>
+            <span class="text-[10px] text-siba-muted font-mono">Cód: ${item.evaluator_code}</span>
+          </div>
+
+          <!-- Calificación / Semáforo -->
+          <div class="md:col-span-2 md:text-center flex items-center md:justify-center gap-2">
+            <span class="font-editorial text-base font-semibold text-siba-forest">${item.final_score}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${item.pill_class}">
               ${item.level}
             </span>
-          </td>
-          <td class="py-3.5 px-4 text-center space-x-1">
-            <button onclick="openDetailModal('${item.id}')" title="Ver detalles, evidencias y fotos" class="p-1.5 text-campo-700 hover:text-campo-900 hover:bg-campo-100 rounded-lg transition">
-              <i data-lucide="eye" class="w-4 h-4"></i>
+          </div>
+
+          <!-- Acciones -->
+          <div class="md:col-span-2 md:text-right flex items-center md:justify-end gap-2 w-full md:w-auto pt-2 md:pt-0 hairline-t md:border-0 border-stone-100">
+            <button onclick="openDetailModal('${item.id}')" class="text-siba-forest hover:text-siba-deep font-semibold text-xs flex items-center gap-1">
+              <span>Ver ficha</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
             </button>
-            <button onclick="downloadSingleExcel('${item.id}')" title="Descargar Ficha en Excel" class="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition">
-              <i data-lucide="download" class="w-4 h-4"></i>
+            <button onclick="downloadSingleExcel('${item.id}')" title="Descargar Ficha Excel" class="p-1 text-siba-muted hover:text-emerald-700 rounded transition ml-1">
+              <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
             </button>
-          </td>
+          </div>
         `;
-        tbody.appendChild(tr);
+        container.appendChild(row);
       });
 
-      document.getElementById('tableBadgeCount').innerText = `${audits.length} auditorías`;
+      document.getElementById('listCounterText').innerText = `Mostrando ${audits.length} de ${currentAudits.length} auditorías`;
       lucide.createIcons();
     }
 
-    // FILTROS
+    // FILTRADO DINÁMICO
     function filterAudits() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
-      const sp = document.getElementById('speciesFilter').value;
-      const lv = document.getElementById('levelFilter').value;
-
+      
       const filtered = currentAudits.filter(a => {
-        const matchesQ = a.evaluator.toLowerCase().includes(q) || a.lot_id.toLowerCase().includes(q) || a.location.toLowerCase().includes(q);
-        const matchesSp = sp === 'ALL' || a.species === sp;
-        const matchesLv = lv === 'ALL' || a.level === lv;
-        return matchesQ && matchesSp && matchesLv;
+        const matchesQ = !q || a.evaluator.toLowerCase().includes(q) || a.lot_id.toLowerCase().includes(q) || a.location.toLowerCase().includes(q);
+        const matchesSp = activeSpeciesFilter === 'ALL' || a.species === activeSpeciesFilter;
+        const matchesAlert = !alertsOnly || a.final_score < 60;
+        return matchesQ && matchesSp && matchesAlert;
       });
 
-      renderTable(filtered);
+      renderList(filtered);
     }
 
     function filterBySpecies(sp) {
-      document.getElementById('speciesFilter').value = sp;
+      activeSpeciesFilter = sp;
+      alertsOnly = false;
+      updateFilterButtons();
       filterAudits();
-    }
 
-    // KPIS
-    function updateKPIs() {
-      document.getElementById('kpiTotalEvals').innerText = currentAudits.length;
-      document.getElementById('kpiPorcinosCount').innerText = `${currentAudits.filter(a => a.species === 'Porcinos').length} lotes`;
-      document.getElementById('kpiAvesCount').innerText = `${currentAudits.filter(a => a.species === 'Aves').length} galpones`;
-      document.getElementById('kpiAlertsCount').innerText = currentAudits.filter(a => a.final_score < 55).length;
-
-      const avg = (currentAudits.reduce((acc, c) => acc + c.final_score, 0) / (currentAudits.length || 1)).toFixed(1);
-      document.getElementById('heroAvgScore').innerText = avg;
-      
-      const heroText = document.getElementById('heroStatusText');
-      if (avg >= 80) {
-        heroText.innerText = "Cumplimiento Excelente (Resolución 136)";
-        heroText.className = "text-xs font-bold text-emerald-800";
-      } else if (avg >= 60) {
-        heroText.innerText = "Cumplimiento Bueno (Aceptable)";
-        heroText.className = "text-xs font-bold text-amber-800";
-      } else {
-        heroText.innerText = "Alerta: Se Requieren Acciones Correctivas en Granja";
-        heroText.className = "text-xs font-bold text-red-800";
+      if (sp === 'Porcinos') {
+        const el = document.getElementById('porcinos');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else if (sp === 'Aves') {
+        const el = document.getElementById('aves');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
       }
     }
 
-    // MODAL DE DETALLES CON FOTOS REALES
+    function filterAlertsOnly() {
+      alertsOnly = !alertsOnly;
+      updateFilterButtons();
+      filterAudits();
+    }
+
+    function updateFilterButtons() {
+      const btnAll = document.getElementById('filterBtnAll');
+      const btnPorc = document.getElementById('filterBtnPorc');
+      const btnAves = document.getElementById('filterBtnAves');
+      const btnAlerts = document.getElementById('filterBtnAlerts');
+
+      const activeCls = "bg-siba-forest text-white border-transparent";
+      const inactiveCls = "bg-white border-siba-hairline text-siba-charcoal hover:bg-stone-50";
+
+      btnAll.className = `px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${activeSpeciesFilter === 'ALL' && !alertsOnly ? activeCls : inactiveCls}`;
+      btnPorc.className = `px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${activeSpeciesFilter === 'Porcinos' && !alertsOnly ? activeCls : inactiveCls}`;
+      btnAves.className = `px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${activeSpeciesFilter === 'Aves' && !alertsOnly ? activeCls : inactiveCls}`;
+      btnAlerts.className = `px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${alertsOnly ? 'bg-siba-terracotta text-white border-transparent' : 'bg-white border-siba-hairline text-siba-terracotta hover:bg-red-50'}`;
+    }
+
+    // KPIS EDITORIALES
+    function updateKPIs() {
+      document.getElementById('kpiTotalEvals').innerText = currentAudits.length;
+      document.getElementById('kpiAlertsCount').innerText = currentAudits.filter(a => a.final_score < 60).length;
+
+      const avg = (currentAudits.reduce((acc, c) => acc + c.final_score, 0) / (currentAudits.length || 1)).toFixed(1);
+      document.getElementById('kpiAvgScore').innerText = avg;
+      
+      const avgStatus = document.getElementById('kpiAvgStatus');
+      if (avg >= 80) {
+        avgStatus.innerText = "Cumplimiento Sobresaliente";
+        avgStatus.className = "text-[10px] text-emerald-800 font-medium mt-1 block";
+      } else if (avg >= 60) {
+        avgStatus.innerText = "Cumplimiento Aceptable";
+        avgStatus.className = "text-[10px] text-amber-800 font-medium mt-1 block";
+      } else {
+        avgStatus.innerText = "Requiere Atención Sanitaria";
+        avgStatus.className = "text-[10px] text-siba-terracotta font-medium mt-1 block";
+      }
+    }
+
+    // MODAL DE DETALLE TÉCNICO CON FOTOGRAFÍAS REALES
     function openDetailModal(id) {
       selectedAudit = currentAudits.find(a => a.id === id);
       if (!selectedAudit) return;
@@ -989,7 +1229,7 @@
       
       const badge = document.getElementById('modalLevelBadge');
       badge.innerText = selectedAudit.level;
-      badge.className = `text-xs px-2.5 py-0.5 rounded-md font-bold ${selectedAudit.badge_class}`;
+      badge.className = `text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${selectedAudit.pill_class}`;
 
       document.getElementById('modalRecursosScore').innerText = `${selectedAudit.score_resources}%`;
       document.getElementById('modalAnimalScore').innerText = `${selectedAudit.score_animal}%`;
@@ -1002,14 +1242,14 @@
 
       selectedAudit.indicators.forEach(ind => {
         const item = document.createElement('div');
-        item.className = "p-4 bg-white rounded-2xl border border-stone-200/90 shadow-sm flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between";
+        item.className = "p-4 bg-white rounded-xl border border-siba-hairline flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between";
 
         const photoHtml = ind.photo
-          ? `<div class="w-20 h-20 rounded-xl overflow-hidden border border-stone-300 flex-shrink-0 bg-stone-100 shadow-inner group relative cursor-pointer" onclick="window.open('${ind.photo}', '_blank')">
+          ? `<div class="w-20 h-20 rounded-lg overflow-hidden border border-siba-hairline flex-shrink-0 bg-stone-100 group relative cursor-pointer" onclick="window.open('${ind.photo}', '_blank')">
                <img src="${ind.photo}" alt="${ind.name}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='assets/porcino2.jpg'">
-               <span class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] text-center py-0.5 font-bold">Ver foto</span>
+               <span class="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] text-center py-0.5 font-medium">Ver foto</span>
              </div>`
-          : `<div class="w-20 h-20 rounded-xl border-2 border-dashed border-stone-200 flex flex-col items-center justify-center text-stone-400 text-[10px] flex-shrink-0 bg-stone-50">
+          : `<div class="w-20 h-20 rounded-lg border border-dashed border-stone-200 flex flex-col items-center justify-center text-siba-muted text-[10px] flex-shrink-0 bg-stone-50">
                <i data-lucide="camera-off" class="w-4 h-4 mb-0.5 text-stone-300"></i>
                Sin foto
              </div>`;
@@ -1019,13 +1259,13 @@
             ${photoHtml}
             <div>
               <div class="flex items-center gap-2">
-                <span class="font-display font-bold text-stone-900 text-xs sm:text-sm">${ind.name}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold ${ind.score >= 80 ? 'bg-emerald-100 text-emerald-800' : (ind.score >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
+                <span class="font-editorial text-sm font-semibold text-siba-forest">${ind.name}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${ind.score >= 80 ? 'bg-emerald-100 text-emerald-800' : (ind.score >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
                   ${ind.score} pts
                 </span>
               </div>
-              <span class="text-[10px] uppercase font-bold text-stone-400 block mt-0.5">${ind.category}</span>
-              <p class="text-xs text-stone-600 mt-1 italic leading-relaxed">"${ind.obs || 'Sin hallazgos anómalos'}"</p>
+              <span class="text-[10px] uppercase font-semibold text-siba-muted block mt-0.5">${ind.category}</span>
+              <p class="text-xs text-siba-charcoal mt-1 italic font-light leading-relaxed">"${ind.obs || 'Sin observaciones anómalas'}"</p>
             </div>
           </div>
         `;
@@ -1050,17 +1290,19 @@
 
     function openConfigModal() {
       document.getElementById('configModal').classList.remove('hidden');
+      lucide.createIcons();
     }
     function closeConfigModal() {
       document.getElementById('configModal').classList.add('hidden');
     }
 
     // =========================================================================
-    // SIMULACIÓN EN VIVO DE ENVÍO DESDE APK ANDROID (TOLERANCIA OFFLINE)
+    // SIMULACIÓN DE RECEPCIÓN DESDE APK MÓVIL (TOLERANCIA OFFLINE)
     // =========================================================================
     function simulateMobileUpload() {
       const now = new Date();
-      const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+      const timeStr = now.toLocaleDateString('es-CO', options);
       
       const simulated = {
         id: "AUD-UFPSO-" + Math.floor(1000 + Math.random() * 9000),
@@ -1069,13 +1311,14 @@
         evaluator_code: "0192546",
         species: "Porcinos",
         lot_id: "LOTE-PORC-NUEVO-" + Math.floor(10 + Math.random() * 90),
-        location: "Corral 4 - Ceba Granja UFPSO",
-        score_resources: 85.0,
+        location: "Corral 4 · Ceba Granja UFPSO",
+        score_resources: 88.0,
         score_animal: 90.0,
-        score_management: 80.0,
-        final_score: 85.0,
+        score_management: 85.0,
+        final_score: 87.5,
         level: "Excelente",
-        badge_class: "badge-excelente",
+        pill_class: "pill-excelente",
+        sync_origin: "SQLite Móvil (Auto-sincronizado)",
         dictamen: "Auditoría tomada sin conexión en el corral y sincronizada automáticamente al recuperar cobertura Wi-Fi en la sede UFPSO.",
         indicators: [
           {
@@ -1083,11 +1326,11 @@
             score: 100,
             category: "Recursos",
             photo: "assets/evidencias/screenshot_09.jpg",
-            obs: "Caudal verificado a 1.8 L/min en chupones."
+            obs: "Caudal verificado a 1.8 L/min en chupones sin fugas."
           },
           {
             name: "Estado de Comederos",
-            score: 80,
+            score: 85,
             category: "Recursos",
             photo: "assets/porcino2.jpg",
             obs: "Comedero seco y limpio con tolva abastecida."
@@ -1095,24 +1338,23 @@
         ]
       };
 
-      // Agregar al inicio de los registros
       currentAudits.unshift(simulated);
-      renderTable(currentAudits);
+      renderList(currentAudits);
       updateKPIs();
 
-      // Disparar Toast visual
+      // Toast sutil
       const toast = document.getElementById('syncToast');
       document.getElementById('toastTitle').innerText = "📡 ¡Auditoría Recibida desde APK!";
-      document.getElementById('toastMessage').innerText = `Lote ${simulated.lot_id} sincronizado automáticamente al detectar señal Wi-Fi.`;
-      toast.classList.remove('translate-y-32');
+      document.getElementById('toastMessage').innerText = `Lote ${simulated.lot_id} sincronizado automáticamente al detectar señal.`;
+      toast.classList.remove('translate-y-36');
 
       setTimeout(() => {
-        toast.classList.add('translate-y-32');
+        toast.classList.add('translate-y-36');
       }, 4500);
     }
 
     // =========================================================================
-    // EXPORTACIÓN PROFESIONAL A EXCEL (.XLSX) CON SHEETJS
+    // EXPORTACIÓN A EXCEL (.XLSX) CON SHEETJS
     // =========================================================================
     function exportToExcel() {
       const rows = currentAudits.map((a, i) => ({
@@ -1120,7 +1362,7 @@
         "Código Auditoría": a.id,
         "Fecha / Hora": a.date,
         "Evaluador Oficial": a.evaluator,
-        "Código Estudiante / Evaluador": a.evaluator_code,
+        "Código Evaluador": a.evaluator_code,
         "Especie Pecuaria": a.species,
         "Identificador Lote": a.lot_id,
         "Ubicación en Granja": a.location,
@@ -1129,6 +1371,7 @@
         "Gestión y Bioseguridad (%)": a.score_management,
         "Índice Global IGBA (0-100)": a.final_score,
         "Nivel de Bienestar": a.level,
+        "Origen Sincronización": a.sync_origin || "SQLite Móvil",
         "Dictamen Técnico Oficial": a.dictamen
       }));
 
@@ -1136,13 +1379,13 @@
       const ws = XLSX.utils.json_to_sheet(rows);
 
       ws['!cols'] = [
-        { wch: 5 }, { wch: 22 }, { wch: 18 }, { wch: 32 }, { wch: 15 },
+        { wch: 5 }, { wch: 22 }, { wch: 22 }, { wch: 32 }, { wch: 15 },
         { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 16 }, { wch: 16 },
-        { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 55 }
+        { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 25 }, { wch: 60 }
       ];
 
-      XLSX.utils.book_append_sheet(wb, ws, "Auditorías SIBA - Granja UFPSO");
-      XLSX.writeFile(wb, `SIBA_Auditorias_UFPSO_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, "Auditorías SIBA UFPSO");
+      XLSX.writeFile(wb, `SIBA_Auditorias_Granja_UFPSO_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
     function downloadSingleExcel(id) {
@@ -1160,6 +1403,7 @@
         ["Especie", audit.species],
         ["Lote / Ubicación", `${audit.lot_id} - ${audit.location}`],
         ["Puntaje Global IGBA", `${audit.final_score} / 100 (${audit.level})`],
+        ["Sincronización", audit.sync_origin || "SQLite Local"],
         ["Dictamen Zootécnico", audit.dictamen],
         [],
         ["DETALLE DE INDICADORES NORMATIVOS REGISTRADOS IN SITU:"],
@@ -1197,7 +1441,7 @@
       localStorage.removeItem('siba_sb_url');
       localStorage.removeItem('siba_sb_key');
       currentAudits = [...REAL_FARM_AUDITS];
-      renderTable(currentAudits);
+      renderList(currentAudits);
       updateKPIs();
       closeConfigModal();
     }
@@ -1211,7 +1455,7 @@
         if (data && data.length > 0) {
           currentAudits = data.map(r => ({
             id: r.id,
-            date: new Date(r.created_at).toLocaleString(),
+            date: new Date(r.created_at).toLocaleString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
             evaluator: r.evaluador_nombre || "Javier Serna",
             evaluator_code: r.evaluador_codigo || "0192546",
             species: r.especie || "Porcinos",
@@ -1222,14 +1466,15 @@
             score_management: Number(r.score_gestion) || 0,
             final_score: Number(r.puntaje_global) || 0,
             level: r.nivel_bienestar || "Regular",
-            badge_class: r.puntaje_global >= 80 ? 'badge-excelente' : (r.puntaje_global >= 60 ? 'badge-bueno' : (r.puntaje_global >= 40 ? 'badge-regular' : 'badge-critico')),
+            pill_class: r.puntaje_global >= 80 ? 'pill-excelente' : (r.puntaje_global >= 60 ? 'pill-bueno' : (r.puntaje_global >= 40 ? 'pill-regular' : 'pill-critico')),
+            sync_origin: "Supabase Cloud",
             dictamen: r.dictamen || "Auditoría registrada en Supabase Cloud.",
             indicators: r.indicadores_json || []
           }));
-          renderTable(currentAudits);
+          renderList(currentAudits);
           updateKPIs();
         }
-        document.getElementById('liveSyncText').innerText = "Supabase Nube Conectado";
+        document.getElementById('syncStatusBadge').innerText = "Supabase Nube Conectado";
       } catch (err) {
         console.warn("Error Supabase:", err);
       }

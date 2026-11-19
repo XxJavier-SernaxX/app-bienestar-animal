@@ -510,10 +510,14 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
         {100: 'Cumple', 55: 'Más del 50% cumple', 0: 'No cumple'};
 
     return Scaffold(
-      backgroundColor: Colors.teal.shade50,
+      backgroundColor: const Color(0xFFF8F9F5),
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        title: Text(widget.indicatorName),
+        backgroundColor: const Color(0xFF263F30),
+        elevation: 0,
+        title: Text(
+          widget.indicatorName,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+        ),
       ),
 
       body: SingleChildScrollView(
@@ -524,13 +528,18 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
             // ----------------------------------------------------------
             // ✅ TÍTULO
             // ----------------------------------------------------------
-            Text(
-              "Selecciona una calificación:",
+            const Text(
+              "Rúbrica de Calificación:",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal.shade900,
+                color: Color(0xFF263F30),
               ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Selecciona el nivel observado según la Resolución 136/253 de 2020.",
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
 
             const SizedBox(height: 15),
@@ -548,13 +557,17 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.teal : Colors.white,
-                  borderRadius: BorderRadius.circular(18),
+                  color: isSelected ? const Color(0xFF263F30) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF263F30) : const Color(0xFFE8ECE6),
+                    width: isSelected ? 1.5 : 1,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 6,
-                      offset: const Offset(0, 4),
-                      color: Colors.black.withOpacity(0.08),
+                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.04),
                     )
                   ],
                 ),
@@ -566,15 +579,15 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
                         isSelected
                             ? Icons.radio_button_checked
                             : Icons.radio_button_off,
-                        color: isSelected ? Colors.white : Colors.teal,
+                        color: isSelected ? Colors.white : const Color(0xFF496B4D),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           "$score puntos — $text",
                           style: TextStyle(
-                            fontSize: 15,
-                            color: isSelected ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                            color: isSelected ? Colors.white : const Color(0xFF353A35),
                             fontWeight:
                                 isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -591,38 +604,35 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
             // ----------------------------------------------------------
             // ✅ FOTO
             // ----------------------------------------------------------
-            Text(
-              "Evidencia fotográfica:",
+            const Text(
+              "Evidencia Fotográfica:",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal.shade900,
+                color: Color(0xFF263F30),
               ),
             ),
             const SizedBox(height: 12),
 
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              height: 220,
+              height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE8ECE6)),
                 boxShadow: [
                   BoxShadow(
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.04),
                   )
                 ],
                 image: _image != null
                     ? DecorationImage(
                         fit: BoxFit.cover,
                         image: FileImage(_image!),
-                        colorFilter: ColorFilter.mode(
-                          Colors.black.withOpacity(0.25),
-                          BlendMode.darken,
-                        ),
                       )
                     : null,
               ),
@@ -634,13 +644,13 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.camera_alt,
-                              size: 50, color: Colors.grey.shade500),
-                          const SizedBox(height: 10),
+                          Icon(Icons.photo_camera_outlined,
+                              size: 42, color: Colors.grey.shade400),
+                          const SizedBox(height: 8),
                           Text(
-                            "Aún no hay foto",
+                            "Sin foto adjunta",
                             style: TextStyle(
-                                color: Colors.grey.shade700, fontSize: 16),
+                                color: Colors.grey.shade600, fontSize: 13),
                           )
                         ],
                       ),
@@ -648,14 +658,16 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
 
                   // ✅ Botón tomar foto
                   Positioned(
-                    bottom: 10,
-                    left: 10,
+                    bottom: 12,
+                    left: 12,
                     child: ElevatedButton.icon(
                       onPressed: _takePhoto,
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text("Tomar foto"),
+                      icon: const Icon(Icons.camera_alt, size: 18),
+                      label: const Text("Tomar foto", style: TextStyle(fontSize: 13)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                        backgroundColor: const Color(0xFF263F30),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       ),
                     ),
                   ),
@@ -663,14 +675,16 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
                   // ✅ Botón eliminar foto
                   if (_image != null)
                     Positioned(
-                      bottom: 10,
-                      right: 10,
+                      bottom: 12,
+                      right: 12,
                       child: ElevatedButton.icon(
                         onPressed: _deletePhoto,
-                        icon: const Icon(Icons.delete),
-                        label: const Text("Eliminar"),
+                        icon: const Icon(Icons.delete, size: 18),
+                        label: const Text("Eliminar", style: TextStyle(fontSize: 13)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
+                          backgroundColor: const Color(0xFFB96E4B),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         ),
                       ),
                     ),
@@ -683,57 +697,53 @@ class _IndicatorDetailState extends State<IndicatorDetail> {
             // ----------------------------------------------------------
             // ✅ OBSERVACIONES
             // ----------------------------------------------------------
-            Text(
-              "Observaciones (opcional):",
+            const Text(
+              "Observaciones Técnicas (opcional):",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal.shade900,
+                color: Color(0xFF263F30),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                border: Border.all(color: const Color(0xFFE8ECE6)),
               ),
               child: TextField(
                 controller: _observationsController,
                 decoration: const InputDecoration(
-                  hintText: 'Escribe aquí tus observaciones...',
+                  hintText: 'Hallazgos in situ, comedero, flujo, cortinas...',
+                  hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
                   border: InputBorder.none,
                 ),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF353A35)),
                 maxLines: 3,
               ),
             ),
 
-            const SizedBox(height: 35),
+            const SizedBox(height: 30),
 
             // ----------------------------------------------------------
             // ✅ BOTÓN GUARDAR
             // ----------------------------------------------------------
             SizedBox(
               width: double.infinity,
-              height: 55,
+              height: 50,
               child: ElevatedButton(
                 onPressed: _saveResult,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal.shade700,
+                  backgroundColor: const Color(0xFF263F30),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: const Text(
-                  "Guardar resultado",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  "Guardar resultado de auditoría",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ),
