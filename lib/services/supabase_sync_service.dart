@@ -17,6 +17,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/database_helper.dart';
 
@@ -36,9 +37,15 @@ class SupabaseSyncService {
 
   /// Inicia el listener de conectividad para sincronización automática
   void _initConnectivityListener() {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) {
-      if (result != ConnectivityResult.none) {
-        print('📶 [SIBA Sync] Conexión a Internet detectada. Iniciando sincronización...');
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((dynamic result) {
+      bool hasNet = false;
+      if (result is List<ConnectivityResult>) {
+        hasNet = result.any((r) => r != ConnectivityResult.none);
+      } else if (result != ConnectivityResult.none) {
+        hasNet = true;
+      }
+      if (hasNet) {
+        debugPrint('📶 [SIBA Sync] Conexión a Internet detectada. Iniciando sincronización...');
         syncPendingData();
       }
     });
@@ -61,9 +68,16 @@ class SupabaseSyncService {
 
     try {
       // 1. Verificar conectividad real
-      final connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
-        print('📴 [SIBA Sync] Sin conexión a internet. Los datos se mantendrán en SQLite local.');
+      final dynamic connectivityResult = await Connectivity().checkConnectivity();
+      bool isOffline = false;
+      if (connectivityResult is List<ConnectivityResult>) {
+        isOffline = connectivityResult.every((r) => r == ConnectivityResult.none);
+      } else if (connectivityResult == ConnectivityResult.none) {
+        isOffline = true;
+      }
+
+      if (isOffline) {
+        debugPrint('📴 [SIBA Sync] Sin conexión a internet. Los datos se mantendrán en SQLite local.');
         _isSyncing = false;
         return {'status': 'offline', 'message': 'Modo fuera de línea activo'};
       }
@@ -76,22 +90,25 @@ class SupabaseSyncService {
       // 3. Obtener registros no sincronizados de SQLite
       final pendingList = await DatabaseHelper.instance.getPendingToSync();
       if (pendingList.isEmpty) {
-        print('✅ [SIBA Sync] No hay registros pendientes por sincronizar.');
+        debugPrint('✅ [SIBA Sync] No hay registros pendientes por sincronizar.');
         _isSyncing = false;
         return {'status': 'ok', 'synced': 0, 'message': 'Todo sincronizado'};
       }
 
-      print('🔄 [SIBA Sync] Subiendo ${pendingList.length} registros pendientes a Supabase...');
+      debugPrint('🔄 [SIBA Sync] Subiendo ${pendingList.length} registros pendientes a Supabase...');
 
       // 4. Agrupar respuestas o enviar por lotes a la tabla 'evaluaciones'
       final client = HttpClient();
       final uri = Uri.parse('$supabaseUrl/rest/v1/evaluaciones');
 
+      final evaluadorNombre = prefs.getString('userName') ?? prefs.getString('user_name') ?? 'Javier Mauricio Serna Osorio';
+      final evaluadorCodigo = prefs.getString('userCode') ?? prefs.getString('user_code') ?? '0192546';
+
       for (var item in pendingList) {
         try {
           final payload = jsonEncode({
-            'evaluador_nombre': prefs.getString('user_name') ?? 'Evaluador UFPSO',
-            'evaluador_codigo': prefs.getString('user_code') ?? '0192546',
+            'evaluador_nombre': evaluadorNombre,
+            'evaluador_codigo': evaluadorCodigo,
             'especie': item['species'] ?? 'Porcinos',
             'lote_codigo': 'LOTE-GRANJA-${item['species'] ?? "PECUARIO"}',
             'ubicacion': 'Granja Experimental UFPSO',

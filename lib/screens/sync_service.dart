@@ -17,8 +17,14 @@ class SyncService {
 
   void _init() {
     // Escuchar cambios de conectividad
-    Connectivity().onConnectivityChanged.listen((status) {
-      if (status != ConnectivityResult.none) {
+    Connectivity().onConnectivityChanged.listen((dynamic status) {
+      bool hasNet = false;
+      if (status is List<ConnectivityResult>) {
+        hasNet = status.any((r) => r != ConnectivityResult.none);
+      } else if (status != ConnectivityResult.none) {
+        hasNet = true;
+      }
+      if (hasNet) {
         _trySync();
       }
     });
