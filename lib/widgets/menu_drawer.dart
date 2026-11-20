@@ -25,10 +25,30 @@ class MenuDrawer extends StatelessWidget {
     {'title': 'Panel Web Administrador (Vercel)', 'code': 'admin_web'},
   ];
 
-  Future<void> _openURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      debugPrint('No se pudo abrir la URL: $url');
+  Future<void> _openURL(BuildContext context, String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFB96E4B),
+            content: Text('No se pudo abrir el navegador para: $url'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFB96E4B),
+            content: Text('Error abriendo enlace: $e'),
+          ),
+        );
+      }
     }
   }
 
@@ -167,7 +187,7 @@ class MenuDrawer extends StatelessWidget {
                           break;
 
                         case 'admin_web':
-                          _openURL('https://siba-admin-ufpso.vercel.app');
+                          _openURL(context, 'https://siba-admin-ufpso.vercel.app');
                           break;
                       }
                     },
@@ -280,6 +300,7 @@ class MenuDrawer extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _normativaTile(
+                  context: context,
                   icon: '🐷',
                   title: 'Resolución 136 de 2020 (MinAgricultura)',
                   subtitle: 'Manual de condiciones de bienestar animal para la especie porcina.',
@@ -287,6 +308,7 @@ class MenuDrawer extends StatelessWidget {
                 ),
                 const Divider(height: 16, color: Color(0xFFE8ECE6)),
                 _normativaTile(
+                  context: context,
                   icon: '📋',
                   title: 'Metodología EBA Porcinos 3.0 (ICA)',
                   subtitle: 'Protocolo de rúbricas para comederos, bebederos y confort en granja.',
@@ -294,6 +316,7 @@ class MenuDrawer extends StatelessWidget {
                 ),
                 const Divider(height: 16, color: Color(0xFFE8ECE6)),
                 _normativaTile(
+                  context: context,
                   icon: '🐔',
                   title: 'Resolución 253 de 2020 (Aves de Postura)',
                   subtitle: 'Directrices técnicas de bienestar para gallinas ponedoras.',
@@ -301,6 +324,7 @@ class MenuDrawer extends StatelessWidget {
                 ),
                 const Divider(height: 16, color: Color(0xFFE8ECE6)),
                 _normativaTile(
+                  context: context,
                   icon: '🥚',
                   title: 'Cartilla Fenavi & ICA (Aves de Postura)',
                   subtitle: 'Manual de nidales, bebederos y ventilación.',
@@ -321,6 +345,7 @@ class MenuDrawer extends StatelessWidget {
   }
 
   Widget _normativaTile({
+    required BuildContext context,
     required String icon,
     required String title,
     required String subtitle,
@@ -332,7 +357,7 @@ class MenuDrawer extends StatelessWidget {
       title: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF263F30))),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: Color(0xFF7A8279))),
       trailing: const Icon(Icons.open_in_new_rounded, size: 16, color: Color(0xFF496B4D)),
-      onTap: () => _openURL(url),
+      onTap: () => _openURL(context, url),
     );
   }
 }
