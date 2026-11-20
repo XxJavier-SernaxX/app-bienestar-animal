@@ -1480,14 +1480,15 @@
       }
     }
 
+    const DEFAULT_SB_URL = "https://ktbgvnfwtsezzxaoirju.supabase.co";
+    const DEFAULT_SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Ymd2bmZ3dHNlenp4YW9pcmp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTEzMzkzNSwiZXhwIjoyMTEwNzA5OTM1fQ.uxq6V7bTbqV7y9Hp7ysg2Z1NTc22aTGcZSoe7_8zuAo";
+
     function listenSupabaseIfConfigured() {
-      const url = localStorage.getItem('siba_sb_url');
-      const key = localStorage.getItem('siba_sb_key');
-      if (url && key) {
-        document.getElementById('cfgSupabaseUrl').value = url;
-        document.getElementById('cfgSupabaseKey').value = key;
-        connectSupabase(url, key);
-      }
+      const url = localStorage.getItem('siba_sb_url') || DEFAULT_SB_URL;
+      const key = localStorage.getItem('siba_sb_key') || DEFAULT_SB_KEY;
+      document.getElementById('cfgSupabaseUrl').value = url;
+      document.getElementById('cfgSupabaseKey').value = key;
+      connectSupabase(url, key);
     }
   </script>
 </body>

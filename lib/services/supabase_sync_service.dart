@@ -25,8 +25,8 @@ class SupabaseSyncService {
   static final SupabaseSyncService instance = SupabaseSyncService._internal();
 
   // URL y Llave pública por defecto de Supabase (Configurable desde la app o SharedPreferences)
-  static const String defaultSupabaseUrl = "https://tu-proyecto.supabase.co";
-  static const String defaultAnonKey = "tu-anon-key-de-supabase";
+  static const String defaultSupabaseUrl = "https://ktbgvnfwtsezzxaoirju.supabase.co";
+  static const String defaultAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Ymd2bmZ3dHNlenp4YW9pcmp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTEzMzkzNSwiZXhwIjoyMTEwNzA5OTM1fQ.uxq6V7bTbqV7y9Hp7ysg2Z1NTc22aTGcZSoe7_8zuAo";
 
   StreamSubscription? _connectivitySubscription;
   bool _isSyncing = false;
