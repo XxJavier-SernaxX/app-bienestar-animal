@@ -40,8 +40,8 @@ class _SpeciesSelectionPageState extends State<SpeciesSelectionPage> {
 
   Future<Map<String, String>> _getUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('userName') ?? 'Javier Mauricio Serna';
-    final code = prefs.getString('userCode') ?? '0192546';
+    final name = prefs.getString('userName') ?? 'Evaluador UFPSO';
+    final code = prefs.getString('userCode') ?? '0000000';
     String date = prefs.getString('selectedDate') ?? '';
 
     if (date.isEmpty) {
@@ -245,8 +245,24 @@ class _SpeciesSelectionPageState extends State<SpeciesSelectionPage> {
                           MaterialPageRoute(
                             builder: (_) => Scaffold(
                               appBar: AppBar(
-                                title: const Text("Bienestar Porcino · UFPSO"),
+                                title: const Text("Bienestar Porcino · UFPSO", style: TextStyle(color: Colors.white, fontSize: 16)),
                                 backgroundColor: const Color(0xFF263F30),
+                                leading: Builder(
+                                  builder: (ctx) => IconButton(
+                                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                                    tooltip: 'Regresar a selección de especie',
+                                    onPressed: () => Navigator.pop(ctx),
+                                  ),
+                                ),
+                                actions: [
+                                  Builder(
+                                    builder: (ctx) => IconButton(
+                                      icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                                      tooltip: 'Menú de auditoría',
+                                      onPressed: () => Scaffold.of(ctx).openDrawer(),
+                                    ),
+                                  ),
+                                ],
                               ),
                               drawer: MenuDrawer(species: 'Porcinos'),
                               body: SingleChildScrollView(
@@ -334,8 +350,24 @@ class _SpeciesSelectionPageState extends State<SpeciesSelectionPage> {
                           MaterialPageRoute(
                             builder: (_) => Scaffold(
                               appBar: AppBar(
-                                title: const Text("Bienestar Avícola · UFPSO"),
+                                title: const Text("Bienestar Avícola · UFPSO", style: TextStyle(color: Colors.white, fontSize: 16)),
                                 backgroundColor: const Color(0xFF263F30),
+                                leading: Builder(
+                                  builder: (ctx) => IconButton(
+                                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                                    tooltip: 'Regresar a selección de especie',
+                                    onPressed: () => Navigator.pop(ctx),
+                                  ),
+                                ),
+                                actions: [
+                                  Builder(
+                                    builder: (ctx) => IconButton(
+                                      icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                                      tooltip: 'Menú de auditoría',
+                                      onPressed: () => Scaffold.of(ctx).openDrawer(),
+                                    ),
+                                  ),
+                                ],
                               ),
                               drawer: MenuDrawer(species: 'Aves de Postura'),
                               body: SingleChildScrollView(

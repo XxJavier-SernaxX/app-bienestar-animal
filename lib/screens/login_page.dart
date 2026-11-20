@@ -15,10 +15,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _nameController =
-      TextEditingController(text: 'Javier Mauricio Serna Osorio');
-  final TextEditingController _codeController =
-      TextEditingController(text: '0192546');
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
 
   DateTime? _selectedDate;
   bool _isSaving = false;
@@ -32,8 +30,12 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _loadSavedUser() async {
     final prefs = await SharedPreferences.getInstance();
     final savedName = prefs.getString('userName');
+    final savedCode = prefs.getString('userCode');
     if (savedName != null && savedName.isNotEmpty) {
       _nameController.text = savedName;
+    }
+    if (savedCode != null && savedCode.isNotEmpty) {
+      _codeController.text = savedCode;
     }
   }
 

@@ -1167,13 +1167,8 @@
       updateFilterButtons();
       filterAudits();
 
-      if (sp === 'Porcinos') {
-        const el = document.getElementById('porcinos');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      } else if (sp === 'Aves') {
-        const el = document.getElementById('aves');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }
+      const el = document.getElementById('diario');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
     function filterAlertsOnly() {

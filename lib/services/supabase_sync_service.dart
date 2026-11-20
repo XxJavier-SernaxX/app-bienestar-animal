@@ -101,8 +101,8 @@ class SupabaseSyncService {
       final client = HttpClient();
       final uri = Uri.parse('$supabaseUrl/rest/v1/evaluaciones');
 
-      final evaluadorNombre = prefs.getString('userName') ?? prefs.getString('user_name') ?? 'Javier Mauricio Serna Osorio';
-      final evaluadorCodigo = prefs.getString('userCode') ?? prefs.getString('user_code') ?? '0192546';
+      final evaluadorNombre = prefs.getString('userName') ?? prefs.getString('user_name') ?? 'Evaluador de Campo';
+      final evaluadorCodigo = prefs.getString('userCode') ?? prefs.getString('user_code') ?? 'UFPSO-001';
 
       for (var item in pendingList) {
         try {
