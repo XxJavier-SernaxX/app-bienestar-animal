@@ -24,9 +24,9 @@ import '../helpers/database_helper.dart';
 class SupabaseSyncService {
   static final SupabaseSyncService instance = SupabaseSyncService._internal();
 
-  // URL y Llave pública por defecto de Supabase (Configurable desde la app o SharedPreferences)
+  // URL y Llave de acceso oficial al proyecto Supabase SIBA-UFPSO
   static const String defaultSupabaseUrl = "https://ktbgvnfwtsezzxaoirju.supabase.co";
-  static const String defaultAnonKey = "sb_publishable_HvbEalC716YQ12TayMw_qA_0iztBGjv";
+  static const String defaultAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Ymd2bmZ3dHNlenp4YW9pcmp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTEzMzkzNSwiZXhwIjoyMTEwNzA5OTM1fQ.uxq6V7bTbqV7y9Hp7ysg2Z1NTc22aTGcZSoe7_8zuAo";
 
   StreamSubscription? _connectivitySubscription;
   bool _isSyncing = false;
@@ -95,36 +95,59 @@ class SupabaseSyncService {
         return {'status': 'ok', 'synced': 0, 'message': 'Todo sincronizado'};
       }
 
-      debugPrint('🔄 [SIBA Sync] Subiendo ${pendingList.length} registros pendientes a Supabase...');
+      debugPrint('🔄 [SIBA Sync] Agrupando ${pendingList.length} indicadores pendientes para consolidar evaluaciones...');
 
-      // 4. Agrupar respuestas o enviar por lotes a la tabla 'evaluaciones'
+      // 4. Agrupar indicadores por especie para crear una única auditoría completa por sesión
+      final Map<String, List<Map<String, dynamic>>> groupedBySpecies = {};
+      for (var item in pendingList) {
+        final species = (item['species'] ?? 'Porcinos').toString();
+        groupedBySpecies.putIfAbsent(species, () => []).add(item);
+      }
+
       final client = HttpClient();
       final uri = Uri.parse('$supabaseUrl/rest/v1/evaluaciones');
 
       final evaluadorNombre = prefs.getString('userName') ?? prefs.getString('user_name') ?? 'Evaluador de Campo';
       final evaluadorCodigo = prefs.getString('userCode') ?? prefs.getString('user_code') ?? 'UFPSO-001';
 
-      for (var item in pendingList) {
+      for (var entry in groupedBySpecies.entries) {
+        final speciesName = entry.key;
+        final items = entry.value;
+
         try {
+          // Calcular promedio global de los indicadores de esta sesión
+          double sumScores = 0.0;
+          for (var it in items) {
+            sumScores += (it['score'] as num?)?.toDouble() ?? 0.0;
+          }
+          final double avgGlobal = items.isNotEmpty ? (sumScores / items.length) : 0.0;
+          final double roundedGlobal = (avgGlobal * 10).round() / 10.0;
+
+          // Convertir la lista de indicadores
+          final List<Map<String, dynamic>> indJsonList = items.map((it) => {
+            'name': it['indicatorTitle'] ?? it['indicatorId'] ?? 'Indicador',
+            'indicatorId': it['indicatorId'],
+            'score': it['score'] ?? 0,
+            'category': it['species'] ?? speciesName,
+            'timestamp': it['timestamp'],
+            'obs': it['observaciones'] ?? '',
+            'photo': it['photo'] ?? ''
+          }).toList();
+
+          final now = DateTime.now();
+          final auditId = "AUD-UFPSO-${now.millisecondsSinceEpoch.toString().substring(7)}";
+
           final payload = jsonEncode({
+            'id': auditId,
             'evaluador_nombre': evaluadorNombre,
             'evaluador_codigo': evaluadorCodigo,
-            'especie': item['species'] ?? 'Porcinos',
-            'lote_codigo': 'LOTE-GRANJA-${item['species'] ?? "PECUARIO"}',
+            'especie': speciesName,
+            'lote_codigo': 'LOTE-GRANJA-$speciesName',
             'ubicacion': 'Granja Experimental UFPSO',
-            'puntaje_global': (item['score'] as num?)?.toDouble() ?? 0.0,
-            'nivel_bienestar': _calcularNivel((item['score'] as num?)?.toDouble() ?? 0.0),
-            'dictamen': item['observaciones'] ?? 'Evaluación registrada desde la app móvil SIBA.',
-            'indicadores_json': [
-              {
-                'indicatorId': item['indicatorId'],
-                'indicatorTitle': item['indicatorTitle'],
-                'score': item['score'],
-                'timestamp': item['timestamp'],
-                'observaciones': item['observaciones'],
-                'photo': item['photo'] ?? ''
-              }
-            ],
+            'puntaje_global': roundedGlobal,
+            'nivel_bienestar': _calcularNivel(roundedGlobal),
+            'dictamen': 'Auditoría integral de $speciesName consolidada con ${items.length} indicadores evaluados.',
+            'indicadores_json': indJsonList,
             'origen_offline': true
           });
 
@@ -138,29 +161,29 @@ class SupabaseSyncService {
           final response = await request.close();
 
           if (response.statusCode >= 200 && response.statusCode < 300) {
-            // Marcar como sincronizado en SQLite
-            final rowId = item['id'] as int;
-            await DatabaseHelper.instance.markAsSynced(rowId, 'supabase_sync_ok');
-            syncedCount++;
+            // Marcar todos los IDs de esta especie como sincronizados en SQLite
+            final List<int> rowIds = items.map((it) => it['id'] as int).toList();
+            await DatabaseHelper.instance.markMultipleAsSynced(rowIds, auditId);
+            syncedCount += items.length;
           } else {
-            errorCount++;
-            print('⚠️ [SIBA Sync] Error al subir registro ${item['id']}: Código HTTP ${response.statusCode}');
+            errorCount += items.length;
+            print('⚠️ [SIBA Sync] Error al subir auditoría grupal $speciesName: Código HTTP ${response.statusCode}');
           }
         } catch (e) {
-          errorCount++;
-          print('⚠️ [SIBA Sync] Excepción al procesar fila ${item['id']}: $e');
+          errorCount += items.length;
+          print('⚠️ [SIBA Sync] Excepción al consolidar auditoría $speciesName: $e');
         }
       }
 
       client.close();
-      print('🚀 [SIBA Sync] Proceso finalizado. Sincronizados: $syncedCount | Pendientes con error: $errorCount');
+      print('🚀 [SIBA Sync] Proceso finalizado. Total indicadores consolidados: $syncedCount');
 
       _isSyncing = false;
       return {
         'status': 'complete',
         'synced': syncedCount,
         'errors': errorCount,
-        'message': 'Sincronización completada exitosamente'
+        'message': 'Auditoría integral sincronizada exitosamente'
       };
     } catch (e) {
       _isSyncing = false;

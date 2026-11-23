@@ -72,12 +72,16 @@ class _SpeciesSelectionPageState extends State<SpeciesSelectionPage> {
 
         return Scaffold(
           backgroundColor: const Color(0xFFF8F9F5),
+          drawer: MenuDrawer(species: 'General'),
           appBar: AppBar(
             backgroundColor: const Color(0xFF263F30),
             elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+            leading: Builder(
+              builder: (ctx) => IconButton(
+                icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                tooltip: 'Menú principal',
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+              ),
             ),
             title: const Text(
               "Línea de Producción",

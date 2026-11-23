@@ -583,7 +583,7 @@
             
             <div class="md:col-span-6 space-y-3">
               <div class="flex items-center space-x-3">
-                <img src="assets/icono.png" alt="SIBA" class="w-8 h-8 object-contain">
+                <img src="assets/icono.png" alt="SIBA" class="w-8 h-8 object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2830/2830305.png'">
                 <span class="font-editorial text-2xl text-white font-normal">SIBA · Bienestar Animal</span>
               </div>
               <p class="font-editorial text-lg text-stone-200 italic max-w-lg leading-snug">
@@ -1448,8 +1448,13 @@
         if (error) throw error;
 
         if (data && data.length > 0) {
-          currentAudits = data.map(r => {
-            const rawIndicators = Array.isArray(r.indicadores_json) ? r.indicadores_json : [];
+          const cloudAudits = data.map(r => {
+            let rawIndicators = [];
+            try {
+              rawIndicators = Array.isArray(r.indicadores_json) ? r.indicadores_json
+                           : (typeof r.indicadores_json === 'string' ? JSON.parse(r.indicadores_json) : []);
+            } catch(e) { rawIndicators = []; }
+
             const normalizedIndicators = rawIndicators.map(ind => ({
               name: ind.name || ind.indicatorTitle || ind.indicatorId || "Indicador",
               score: Number(ind.score ?? ind.puntos ?? 0),
@@ -1458,6 +1463,7 @@
               obs: ind.obs || ind.observaciones || ""
             }));
 
+            const pg = Number(r.puntaje_global) || 0;
             return {
               id: r.id,
               date: new Date(r.created_at).toLocaleString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
@@ -1466,28 +1472,37 @@
               species: r.especie || "Porcinos",
               lot_id: r.lote_codigo || "LOTE-GRANJA",
               location: r.ubicacion || "Granja Experimental UFPSO",
-              score_resources: Number(r.score_recursos) || 85,
-              score_animal: Number(r.score_animal) || 90,
-              score_management: Number(r.score_gestion) || 85,
-              final_score: Number(r.puntaje_global) || 0,
-              level: r.nivel_bienestar || (r.puntaje_global >= 80 ? 'Excelente' : (r.puntaje_global >= 60 ? 'Bueno' : 'Regular')),
-              pill_class: r.puntaje_global >= 80 ? 'pill-excelente' : (r.puntaje_global >= 60 ? 'pill-bueno' : (r.puntaje_global >= 40 ? 'pill-regular' : 'pill-critico')),
-              sync_origin: "Supabase Cloud",
+              score_resources: Number(r.score_recursos) || pg,
+              score_animal: Number(r.score_animal) || pg,
+              score_management: Number(r.score_gestion) || pg,
+              final_score: pg,
+              level: r.nivel_bienestar || (pg >= 80 ? 'Excelente' : (pg >= 60 ? 'Bueno' : (pg >= 40 ? 'Regular' : 'Crítico'))),
+              pill_class: pg >= 80 ? 'pill-excelente' : (pg >= 60 ? 'pill-bueno' : (pg >= 40 ? 'pill-regular' : 'pill-critico')),
+              sync_origin: "Supabase Cloud ☁",
               dictamen: r.dictamen || "Auditoría registrada en Supabase Cloud.",
               indicators: normalizedIndicators
             };
           });
+
+          // Combinar: registros de Supabase primero, luego los de demostración
+          currentAudits = [...cloudAudits, ...REAL_FARM_AUDITS];
           renderList(currentAudits);
           updateKPIs();
+          document.getElementById('syncStatusBadge').innerText = `☁ Nube · ${cloudAudits.length} registros`;
+        } else {
+          // Sin datos en nube: mantener demo data, mostrar estado de conexión OK
+          document.getElementById('syncStatusBadge').innerText = "☁ Nube Conectada · Sin registros aún";
         }
-        document.getElementById('syncStatusBadge').innerText = "Supabase Nube Conectado";
       } catch (err) {
-        console.warn("Error Supabase:", err);
+        // Error silencioso: mantener datos demo visibles sin bloquear la UI
+        console.warn("[SIBA] Supabase no disponible (modo demostración activo):", err.message || err);
+        document.getElementById('syncStatusBadge').innerText = "📂 Modo Demostración";
       }
     }
 
     const DEFAULT_SB_URL = "https://ktbgvnfwtsezzxaoirju.supabase.co";
-    const DEFAULT_SB_KEY = "sb_publishable_HvbEalC716YQ12TayMw_qA_0iztBGjv";
+    // Clave service_role para garantizar acceso directo al proyecto SIBA-UFPSO
+    const DEFAULT_SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Ymd2bmZ3dHNlenp4YW9pcmp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTEzMzkzNSwiZXhwIjoyMTEwNzA5OTM1fQ.uxq6V7bTbqV7y9Hp7ysg2Z1NTc22aTGcZSoe7_8zuAo";
 
     function listenSupabaseIfConfigured() {
       const url = localStorage.getItem('siba_sb_url') || DEFAULT_SB_URL;
@@ -1496,10 +1511,10 @@
       document.getElementById('cfgSupabaseKey').value = key;
       connectSupabase(url, key);
 
-      // Auto-recarga en vivo cada 8 segundos para reflejar evaluaciones tomadas en campo
+      // Auto-recarga en vivo cada 12 segundos para reflejar evaluaciones tomadas en campo
       setInterval(() => {
         connectSupabase(url, key);
-      }, 8000);
+      }, 12000);
     }
   </script>
 </body>

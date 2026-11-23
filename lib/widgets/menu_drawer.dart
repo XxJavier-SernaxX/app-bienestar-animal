@@ -23,6 +23,7 @@ class MenuDrawer extends StatelessWidget {
     {'title': 'Sincronizar con Nube (Supabase)', 'code': 'sync'},
     {'title': 'Documentos Oficiales ICA / MADR', 'code': 'normativa'},
     {'title': 'Panel Web Administrador (Vercel)', 'code': 'admin_web'},
+    {'title': 'Cambiar Evaluador / Salir', 'code': 'logout'},
   ];
 
   Future<void> _openURL(BuildContext context, String url) async {
@@ -83,7 +84,9 @@ class MenuDrawer extends StatelessWidget {
                           height: 32,
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) => Text(
-                            species.toLowerCase().contains('ave') ? '🐔' : '🐷',
+                            species == 'General'
+                                ? '🌿'
+                                : (species.toLowerCase().contains('ave') ? '🐔' : '🐷'),
                             style: const TextStyle(fontSize: 22),
                           ),
                         ),
@@ -123,9 +126,11 @@ class MenuDrawer extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      species.toLowerCase().contains('ave')
-                          ? 'Módulo Aves · Resolución 253/2020'
-                          : 'Módulo Porcinos · Resolución 136/2020',
+                      species == 'General'
+                          ? 'Panel Principal · Granja UFPSO'
+                          : (species.toLowerCase().contains('ave')
+                              ? 'Módulo Aves · Resolución 253/2020'
+                              : 'Módulo Porcinos · Resolución 136/2020'),
                       style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
                     ),
                   ),
@@ -189,6 +194,10 @@ class MenuDrawer extends StatelessWidget {
                         case 'admin_web':
                           _openURL(context, 'https://app-bienestar-animal.vercel.app');
                           break;
+
+                        case 'logout':
+                          _confirmLogout(context);
+                          break;
                       }
                     },
                   );
@@ -236,9 +245,49 @@ class MenuDrawer extends StatelessWidget {
         return const Icon(Icons.menu_book_outlined, color: Color(0xFFB96E4B), size: 20);
       case 'admin_web':
         return const Icon(Icons.open_in_browser_rounded, color: Color(0xFF263F30), size: 20);
+      case 'logout':
+        return const Icon(Icons.logout_rounded, color: Color(0xFFB96E4B), size: 20);
       default:
         return const Icon(Icons.circle, size: 20);
     }
+  }
+
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFB96E4B)),
+            SizedBox(width: 8),
+            Text('¿Seguro que quieres salir?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF263F30))),
+          ],
+        ),
+        content: const Text(
+          'Regresarás a la pantalla inicial para cambiar el nombre o código del evaluador.',
+          style: TextStyle(fontSize: 13, color: Color(0xFF353A35)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dContext),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF7A8279))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFB96E4B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(dContext); // Cierra dialog
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            },
+            child: const Text('Sí, salir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _triggerSync(BuildContext context) async {
