@@ -1097,7 +1097,7 @@
           <div class="md:col-span-3">
             <span class="font-medium text-siba-charcoal block">${item.date}</span>
             <span class="text-[10px] text-siba-muted font-mono flex items-center gap-1 mt-0.5">
-              <span class="w-1.5 h-1.5 rounded-full ${item.sync_origin.includes('SQLite') ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
+              <span class="w-1.5 h-1.5 rounded-full ${(item.sync_origin || '').includes('SQLite') ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
               ${item.sync_origin || 'SQLite Móvil'}
             </span>
           </div>
@@ -1487,7 +1487,7 @@
     }
 
     const DEFAULT_SB_URL = "https://ktbgvnfwtsezzxaoirju.supabase.co";
-    const DEFAULT_SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Ymd2bmZ3dHNlenp4YW9pcmp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTEzMzkzNSwiZXhwIjoyMTEwNzA5OTM1fQ.uxq6V7bTbqV7y9Hp7ysg2Z1NTc22aTGcZSoe7_8zuAo";
+    const DEFAULT_SB_KEY = "sb_publishable_HvbEalC716YQ12TayMw_qA_0iztBGjv";
 
     function listenSupabaseIfConfigured() {
       const url = localStorage.getItem('siba_sb_url') || DEFAULT_SB_URL;
@@ -1495,6 +1495,11 @@
       document.getElementById('cfgSupabaseUrl').value = url;
       document.getElementById('cfgSupabaseKey').value = key;
       connectSupabase(url, key);
+
+      // Auto-recarga en vivo cada 8 segundos para reflejar evaluaciones tomadas en campo
+      setInterval(() => {
+        connectSupabase(url, key);
+      }, 8000);
     }
   </script>
 </body>
