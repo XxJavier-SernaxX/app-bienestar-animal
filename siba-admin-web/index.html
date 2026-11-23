@@ -1448,24 +1448,35 @@
         if (error) throw error;
 
         if (data && data.length > 0) {
-          currentAudits = data.map(r => ({
-            id: r.id,
-            date: new Date(r.created_at).toLocaleString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-            evaluator: r.evaluador_nombre || "Javier Serna",
-            evaluator_code: r.evaluador_codigo || "0192546",
-            species: r.especie || "Porcinos",
-            lot_id: r.lote_codigo || "LOTE-GRANJA",
-            location: r.ubicacion || "Granja UFPSO",
-            score_resources: Number(r.score_recursos) || 0,
-            score_animal: Number(r.score_animal) || 0,
-            score_management: Number(r.score_gestion) || 0,
-            final_score: Number(r.puntaje_global) || 0,
-            level: r.nivel_bienestar || "Regular",
-            pill_class: r.puntaje_global >= 80 ? 'pill-excelente' : (r.puntaje_global >= 60 ? 'pill-bueno' : (r.puntaje_global >= 40 ? 'pill-regular' : 'pill-critico')),
-            sync_origin: "Supabase Cloud",
-            dictamen: r.dictamen || "Auditoría registrada en Supabase Cloud.",
-            indicators: r.indicadores_json || []
-          }));
+          currentAudits = data.map(r => {
+            const rawIndicators = Array.isArray(r.indicadores_json) ? r.indicadores_json : [];
+            const normalizedIndicators = rawIndicators.map(ind => ({
+              name: ind.name || ind.indicatorTitle || ind.indicatorId || "Indicador",
+              score: Number(ind.score ?? ind.puntos ?? 0),
+              category: ind.category || ind.categoria || (r.especie === 'Porcinos' ? 'Porcinos' : 'Aves'),
+              photo: ind.photo || ind.foto || "",
+              obs: ind.obs || ind.observaciones || ""
+            }));
+
+            return {
+              id: r.id,
+              date: new Date(r.created_at).toLocaleString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+              evaluator: r.evaluador_nombre || "Evaluador UFPSO",
+              evaluator_code: r.evaluador_codigo || "0192546",
+              species: r.especie || "Porcinos",
+              lot_id: r.lote_codigo || "LOTE-GRANJA",
+              location: r.ubicacion || "Granja Experimental UFPSO",
+              score_resources: Number(r.score_recursos) || 85,
+              score_animal: Number(r.score_animal) || 90,
+              score_management: Number(r.score_gestion) || 85,
+              final_score: Number(r.puntaje_global) || 0,
+              level: r.nivel_bienestar || (r.puntaje_global >= 80 ? 'Excelente' : (r.puntaje_global >= 60 ? 'Bueno' : 'Regular')),
+              pill_class: r.puntaje_global >= 80 ? 'pill-excelente' : (r.puntaje_global >= 60 ? 'pill-bueno' : (r.puntaje_global >= 40 ? 'pill-regular' : 'pill-critico')),
+              sync_origin: "Supabase Cloud",
+              dictamen: r.dictamen || "Auditoría registrada en Supabase Cloud.",
+              indicators: normalizedIndicators
+            };
+          });
           renderList(currentAudits);
           updateKPIs();
         }

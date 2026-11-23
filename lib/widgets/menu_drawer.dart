@@ -187,7 +187,7 @@ class MenuDrawer extends StatelessWidget {
                           break;
 
                         case 'admin_web':
-                          _openURL(context, 'https://siba-admin-ufpso.vercel.app');
+                          _openURL(context, 'https://app-bienestar-animal.vercel.app');
                           break;
                       }
                     },
