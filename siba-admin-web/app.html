@@ -77,13 +77,16 @@
     .pill-regular   { background-color: #FDF4E7; color: #8F5310; border: 1px solid #F3D2A7; }
     .pill-critico   { background-color: #FAF0EE; color: #9E3725; border: 1px solid #EBC3BC; }
 
-    /* Transición suave entre pantallas */
+    /* Transición suave entre pantallas y ocultamiento estricto */
     .app-screen {
-      display: none;
-      animation: fadeIn 0.18s ease-in-out;
+      display: none !important;
     }
     .app-screen.active {
-      display: block;
+      display: flex !important;
+      flex-direction: column;
+      flex: 1 1 0%;
+      width: 100%;
+      animation: fadeIn 0.16s ease-in-out;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
@@ -91,17 +94,17 @@
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col font-sans selection:bg-siba-forest selection:text-white">
+<body class="min-h-full flex flex-col font-sans bg-siba-parchment selection:bg-siba-forest selection:text-white">
 
   <!-- ========================================================================= -->
-  <!-- CONTENEDOR PRINCIPAL TIPO APLICACIÓN MÓVIL (NATIVO EN IPHONE / ANDROID)   -->
+  <!-- CONTENEDOR PRINCIPAL FLUIDO Y 100% RESPONSIVE (SIN BORDES BLANCOS LATERALES)-->
   <!-- ========================================================================= -->
-  <div class="w-full max-w-lg mx-auto min-h-screen flex flex-col bg-siba-parchment shadow-2xl relative overflow-x-hidden">
+  <div class="w-full min-h-screen flex flex-col bg-siba-parchment relative overflow-x-hidden">
 
     <!-- ----------------------------------------------------------------------- -->
-    <!-- APPBAR PRINCIPAL GLOBAL (ADAPTATIVO)                                    -->
+    <!-- APPBAR PRINCIPAL GLOBAL (ADAPTATIVO Y DE ANCHO COMPLETO)               -->
     <!-- ----------------------------------------------------------------------- -->
-    <header id="mainAppBar" class="bg-siba-forest text-white safe-top sticky top-0 z-40 shadow-sm flex items-center justify-between px-4 py-3.5">
+    <header id="mainAppBar" class="w-full bg-siba-forest text-white safe-top sticky top-0 z-40 shadow-sm flex items-center justify-between px-4 py-3.5">
       <div class="flex items-center gap-2.5">
         <!-- Botón Menú Hamburguesa (a la izquierda estándar) -->
         <button onclick="toggleDrawer(true)" class="p-1.5 rounded-lg text-white hover:bg-white/10 active:scale-95 transition" title="Menú de opciones">
