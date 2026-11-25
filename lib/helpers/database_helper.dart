@@ -92,6 +92,17 @@ class DatabaseHelper {
     );
   }
 
+  /// ✅ Marcar múltiples IDs como sincronizados de una sola vez
+  Future<void> markMultipleAsSynced(List<int> ids, String syncId) async {
+    if (ids.isEmpty) return;
+    final db = await instance.database;
+    final placeholders = List.filled(ids.length, '?').join(',');
+    await db.rawUpdate(
+      'UPDATE responses SET synced = 1, firebase_id = ? WHERE id IN ($placeholders)',
+      [syncId, ...ids],
+    );
+  }
+
   /// ✅ Borrar todo (si se necesita)
   Future<void> clearResponses() async {
     final db = await instance.database;

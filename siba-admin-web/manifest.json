@@ -1,0 +1,25 @@
+{
+  "name": "SIBA · Bienestar Animal UFPSO",
+  "short_name": "SIBA",
+  "description": "Sistema de Información de Bienestar Animal — Granja Experimental UFPSO (Porcinos y Aves de Postura)",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F9F5",
+  "theme_color": "#263F30",
+  "icons": [
+    {
+      "src": "assets/icono.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icono.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

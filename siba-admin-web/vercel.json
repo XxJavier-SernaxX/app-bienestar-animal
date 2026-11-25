@@ -13,6 +13,22 @@
       "dest": "/assets/$1"
     },
     {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/sw.js",
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/app",
+      "dest": "/app.html"
+    },
+    {
+      "src": "/app.html",
+      "dest": "/app.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

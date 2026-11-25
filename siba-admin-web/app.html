@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SIBA Móvil · Bienestar Animal UFPSO</title>
+
+  <!-- PWA & Apple iOS Optimizations -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#263F30">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SIBA UFPSO">
+  <link rel="apple-touch-icon" href="assets/icono.png">
+  <link rel="icon" type="image/png" href="assets/icono.png">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- SheetJS para Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Supabase JS Client Oficial -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Fuentes Oficiales -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Newsreader"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
+          },
+          colors: {
+            siba: {
+              forest: '#263F30',
+              deep: '#1A2E22',
+              moss: '#496B4D',
+              sage: '#8BA77B',
+              parchment: '#F8F9F5',
+              card: '#FFFFFF',
+              charcoal: '#353A35',
+              muted: '#7A8279',
+              hairline: '#E8ECE6',
+              terracotta: '#B96E4B',
+              amber: '#D97706',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F8F9F5;
+      color: #353A35;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    .safe-top { padding-top: env(safe-area-inset-top, 16px); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+    .font-editorial { font-family: 'Newsreader', Georgia, serif; letter-spacing: -0.02em; }
+    
+    .pill-excelente { background-color: #EBF4EC; color: #235933; border: 1px solid #C4DFC8; }
+    .pill-bueno     { background-color: #F5F7EB; color: #5B6B1E; border: 1px solid #DCE3BE; }
+    .pill-regular   { background-color: #FDF4E7; color: #8F5310; border: 1px solid #F3D2A7; }
+    .pill-critico   { background-color: #FAF0EE; color: #9E3725; border: 1px solid #EBC3BC; }
+
+    /* Transición suave entre pantallas */
+    .app-screen {
+      display: none;
+      animation: fadeIn 0.18s ease-in-out;
+    }
+    .app-screen.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col font-sans selection:bg-siba-forest selection:text-white">
+
+  <!-- ========================================================================= -->
+  <!-- CONTENEDOR PRINCIPAL TIPO APLICACIÓN MÓVIL (NATIVO EN IPHONE / ANDROID)   -->
+  <!-- ========================================================================= -->
+  <div class="w-full max-w-lg mx-auto min-h-screen flex flex-col bg-siba-parchment shadow-2xl relative overflow-x-hidden">
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- APPBAR PRINCIPAL GLOBAL (ADAPTATIVO)                                    -->
+    <!-- ----------------------------------------------------------------------- -->
+    <header id="mainAppBar" class="bg-siba-forest text-white safe-top sticky top-0 z-40 shadow-sm flex items-center justify-between px-4 py-3.5">
+      <div class="flex items-center gap-2.5">
+        <!-- Botón Menú Hamburguesa (a la izquierda estándar) -->
+        <button onclick="toggleDrawer(true)" class="p-1.5 rounded-lg text-white hover:bg-white/10 active:scale-95 transition" title="Menú de opciones">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+        <span id="appBarTitle" class="font-semibold text-base tracking-tight truncate max-w-[210px]">
+          Línea de Producción
+        </span>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <!-- Indicador de conexión en línea / offline -->
+        <span id="netStatusIcon" class="w-2.5 h-2.5 rounded-full bg-emerald-400" title="En línea"></span>
+
+        <!-- Botón Sincronizar Nube con Contador Pendiente -->
+        <button onclick="syncWithSupabase(true)" class="relative p-2 rounded-lg text-white hover:bg-white/10 active:scale-95 transition" title="Sincronizar con Supabase Cloud">
+          <i data-lucide="cloud" class="w-5 h-5"></i>
+          <span id="pendingBadge" class="hidden absolute top-1 right-1 bg-siba-terracotta text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Botón Acceso a Panel Web Central -->
+        <a href="index.html" class="p-2 rounded-lg text-stone-200 hover:text-white hover:bg-white/10 active:scale-95 transition" title="Abrir Panel Web Administrador">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- BANNER DE INSTALACIÓN PARA IPHONE (SAFARI) -->
+    <div id="iosInstallBanner" class="hidden bg-stone-900 text-white text-xs px-4 py-3 hairline-b flex items-center justify-between z-30">
+      <div class="flex items-center gap-2.5">
+        <span class="text-lg">📲</span>
+        <p class="leading-tight">
+          <strong class="text-siba-sage">¿Usas iPhone?</strong> Toca Compartir <span class="font-mono text-stone-300">⎋</span> y luego <strong>"Añadir a pantalla de inicio"</strong>.
+        </p>
+      </div>
+      <button onclick="document.getElementById('iosInstallBanner').style.display='none'" class="text-stone-400 hover:text-white p-1">✕</button>
+    </div>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- PANTALLA 1: INICIO DE SESIÓN / IDENTIFICACIÓN EVALUADOR                 -->
+    <!-- ----------------------------------------------------------------------- -->
+    <section id="screenLogin" class="app-screen p-6 flex-1 flex flex-col justify-between">
+      <div class="space-y-6 pt-4">
+        <div class="text-center space-y-2">
+          <div class="w-20 h-20 rounded-2xl bg-siba-forest p-3.5 mx-auto shadow-lg shadow-siba-forest/20 flex items-center justify-center">
+            <img src="assets/icono.png" alt="SIBA" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2830/2830305.png'">
+          </div>
+          <div>
+            <h1 class="font-editorial text-3xl font-semibold text-siba-forest">SIBA</h1>
+            <p class="text-xs tracking-wider uppercase text-siba-moss font-bold">Sistema de Bienestar Animal</p>
+            <p class="text-[11px] text-siba-muted mt-0.5">Granja Experimental UFPSO · Ocaña</p>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-siba-hairline shadow-sm space-y-4">
+          <span class="text-xs uppercase font-bold text-siba-muted block">Datos del Evaluador en Campo:</span>
+          
+          <div>
+            <label class="block text-xs font-semibold text-siba-charcoal mb-1">Nombre completo:</label>
+            <input type="text" id="loginName" placeholder="Ej: Javier Mauricio Serna Osorio" class="w-full p-3 bg-stone-50 border border-siba-hairline rounded-xl text-sm focus:border-siba-moss focus:bg-white focus:outline-none">
+            <!-- Sugerencias de investigadores oficiales -->
+            <div class="flex gap-1.5 mt-2 flex-wrap">
+              <button onclick="selectQuickUser('Javier Mauricio Serna Osorio', '0192546')" class="text-[10px] bg-siba-parchment hover:bg-stone-200 border border-siba-hairline px-2 py-1 rounded-md text-siba-forest font-medium">Javier Serna (0192546)</button>
+              <button onclick="selectQuickUser('Juan Manuel Garrido Amaya', '0192544')" class="text-[10px] bg-siba-parchment hover:bg-stone-200 border border-siba-hairline px-2 py-1 rounded-md text-siba-forest font-medium">Juan Garrido (0192544)</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-siba-charcoal mb-1">Código institucional:</label>
+            <input type="text" id="loginCode" placeholder="Ej: 0192546" class="w-full p-3 bg-stone-50 border border-siba-hairline rounded-xl text-sm focus:border-siba-moss focus:bg-white focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-siba-charcoal mb-1">Fecha de auditoría:</label>
+            <input type="date" id="loginDate" class="w-full p-3 bg-stone-50 border border-siba-hairline rounded-xl text-sm focus:border-siba-moss focus:bg-white focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-6 pb-4">
+        <button onclick="saveAndEnterApp()" class="w-full py-4 bg-siba-forest hover:bg-siba-deep active:scale-[0.98] transition text-white font-semibold rounded-2xl shadow-lg shadow-siba-forest/20 flex items-center justify-center gap-2 text-sm">
+          <span>Iniciar Auditoría de Campo</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- PANTALLA 2: SELECCIÓN DE ESPECIE (LÍNEA DE PRODUCCIÓN)                  -->
+    <!-- ----------------------------------------------------------------------- -->
+    <section id="screenSpecies" class="app-screen flex-1 flex flex-col">
+      <!-- Franja editorial del evaluador activo -->
+      <div class="bg-white px-5 py-3.5 border-b border-siba-hairline flex items-center justify-between text-xs">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-siba-muted tracking-wide flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-siba-moss"></span>
+            Granja Experimental UFPSO
+          </span>
+          <p id="speciesActiveEvaluator" class="font-bold text-siba-forest text-sm mt-0.5 truncate max-w-[200px]">Javier Mauricio Serna Osorio</p>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-siba-muted">Fecha de campo</span>
+          <p id="speciesActiveDate" class="font-semibold text-siba-charcoal">24 Nov 2026</p>
+        </div>
+      </div>
+
+      <div class="p-5 flex-1 space-y-4">
+        <p class="text-xs font-bold text-siba-muted uppercase tracking-wider">
+          Selecciona la especie pecuaria a evaluar:
+        </p>
+
+        <!-- Tarjeta Porcinos -->
+        <div onclick="selectSpecies('Porcinos')" class="bg-white rounded-2xl border border-siba-hairline shadow-sm overflow-hidden active:scale-[0.98] transition cursor-pointer group">
+          <div class="relative h-44 bg-stone-100">
+            <img src="assets/porcino1.jpg" alt="Porcinos" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=600'">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <span class="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+              Resolución 136 de 2020
+            </span>
+            <div class="absolute bottom-3 left-4 text-white">
+              <h3 class="font-editorial text-2xl font-bold">Porcinos</h3>
+              <p class="text-xs text-stone-200">Ceba, Gestación y Maternidad</p>
+            </div>
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div class="space-y-0.5">
+              <span class="text-xs font-semibold text-siba-forest">37 Indicadores Normativos</span>
+              <p class="text-[11px] text-siba-muted">Metodología EBA Porcinos 3.0 · ICA</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-siba-parchment flex items-center justify-center text-siba-forest group-hover:bg-siba-forest group-hover:text-white transition">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Aves de Postura -->
+        <div onclick="selectSpecies('Aves de Postura')" class="bg-white rounded-2xl border border-siba-hairline shadow-sm overflow-hidden active:scale-[0.98] transition cursor-pointer group">
+          <div class="relative h-44 bg-stone-100">
+            <img src="assets/aves1.png" alt="Aves" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=600'">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <span class="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+              Resolución 253 de 2020
+            </span>
+            <div class="absolute bottom-3 left-4 text-white">
+              <h3 class="font-editorial text-2xl font-bold">Aves de Postura</h3>
+              <p class="text-xs text-stone-200">Ponedoras en Piso y Pastoreo</p>
+            </div>
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div class="space-y-0.5">
+              <span class="text-xs font-semibold text-siba-moss">25 Indicadores Normativos</span>
+              <p class="text-[11px] text-siba-muted">Directrices Técnicas Fenavi & ICA</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-siba-parchment flex items-center justify-center text-siba-moss group-hover:bg-siba-moss group-hover:text-white transition">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- PANTALLA 3: HUB DE CATEGORÍAS DE LA ESPECIE SELECCIONADA                -->
+    <!-- ----------------------------------------------------------------------- -->
+    <section id="screenCategories" class="app-screen flex-1 flex flex-col">
+      <!-- Barra superior de especie con botón "Regresar" -->
+      <div class="bg-white px-4 py-3 border-b border-siba-hairline flex items-center justify-between text-xs">
+        <button onclick="goToSpeciesSelection()" class="text-siba-forest font-semibold flex items-center gap-1 hover:underline">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Regresar</span>
+        </button>
+        <span id="categorySpeciesTitle" class="font-bold text-siba-forest text-sm">Porcinos · Res. 136</span>
+        <button onclick="openResultsScreen()" class="text-xs bg-siba-forest text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 active:scale-95 transition">
+          <i data-lucide="award" class="w-3.5 h-3.5"></i>
+          <span>Resultados</span>
+        </button>
+      </div>
+
+      <!-- Barra de progreso general de la especie -->
+      <div class="bg-siba-parchment p-4 border-b border-siba-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="text-siba-muted font-medium">Progreso general de evaluación:</span>
+          <span id="overallProgressText" class="font-bold text-siba-forest">0 de 37 evaluados</span>
+        </div>
+        <div class="w-full h-2 bg-stone-200 rounded-full overflow-hidden">
+          <div id="overallProgressBar" class="h-full bg-siba-forest rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Las Tres Categorías de Auditoría -->
+      <div class="p-5 flex-1 space-y-3.5">
+        <span class="text-[11px] font-bold text-siba-muted uppercase tracking-wider block">
+          Categorías Normativas:
+        </span>
+
+        <!-- Categoría 1: Recursos y Alojamiento -->
+        <div onclick="openCategory('recursos')" class="bg-white p-4 rounded-2xl border border-siba-hairline shadow-sm flex items-center justify-between active:scale-[0.98] transition cursor-pointer">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-siba-forest/10 text-siba-forest flex items-center justify-center">
+              <i data-lucide="home" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-siba-forest text-sm">Recursos y Alojamiento</h4>
+              <p class="text-[11px] text-siba-muted">Comederos, bebederos, ventilación y espacio</p>
+              <span id="badgeCatRecursos" class="inline-block mt-1 text-[10px] font-semibold text-siba-moss">0 evaluados</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-stone-400"></i>
+        </div>
+
+        <!-- Categoría 2: Salud y Condición Animal -->
+        <div onclick="openCategory('animal')" class="bg-white p-4 rounded-2xl border border-siba-hairline shadow-sm flex items-center justify-between active:scale-[0.98] transition cursor-pointer">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-siba-moss/10 text-siba-moss flex items-center justify-center">
+              <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-siba-forest text-sm">Salud y Condición Animal</h4>
+              <p class="text-[11px] text-siba-muted">Condición corporal, lesiones, plumaje y jadeo</p>
+              <span id="badgeCatAnimal" class="inline-block mt-1 text-[10px] font-semibold text-siba-moss">0 evaluados</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-stone-400"></i>
+        </div>
+
+        <!-- Categoría 3: Gestión y Bioseguridad -->
+        <div onclick="openCategory('gestion')" class="bg-white p-4 rounded-2xl border border-siba-hairline shadow-sm flex items-center justify-between active:scale-[0.98] transition cursor-pointer">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-siba-terracotta/10 text-siba-terracotta flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-siba-forest text-sm">Gestión y Bioseguridad</h4>
+              <p class="text-[11px] text-siba-muted">Plan sanitario, registros, capacitación y manejo</p>
+              <span id="badgeCatGestion" class="inline-block mt-1 text-[10px] font-semibold text-siba-moss">0 evaluados</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-stone-400"></i>
+        </div>
+
+        <!-- Botón Ver Resultados en Grande -->
+        <div class="pt-4">
+          <button onclick="openResultsScreen()" class="w-full py-3.5 bg-siba-forest hover:bg-siba-deep active:scale-[0.98] transition text-white font-semibold rounded-2xl shadow-md flex items-center justify-center gap-2 text-xs">
+            <i data-lucide="file-check" class="w-4 h-4"></i>
+            <span>Ver Ficha Consolidada y Calcular IGBA</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- PANTALLA 4: LISTA DE INDICADORES DE LA CATEGORÍA                        -->
+    <!-- ----------------------------------------------------------------------- -->
+    <section id="screenIndicatorsList" class="app-screen flex-1 flex flex-col">
+      <div class="bg-white px-4 py-3 border-b border-siba-hairline flex items-center justify-between text-xs sticky top-[57px] z-20">
+        <button onclick="goToCategoriesHub()" class="text-siba-forest font-semibold flex items-center gap-1 hover:underline">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Regresar</span>
+        </button>
+        <span id="indicatorListCatTitle" class="font-bold text-siba-forest text-sm truncate max-w-[220px]">Recursos y Alojamiento</span>
+        <span id="indicatorListProgress" class="font-mono text-[11px] text-siba-muted">0/18</span>
+      </div>
+
+      <div id="indicatorsContainer" class="p-4 flex-1 space-y-2.5">
+        <!-- Generado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- PANTALLA 5: FORMULARIO DETALLADO DEL INDICADOR (RÚBRICA & FOTO)         -->
+    <!-- ----------------------------------------------------------------------- -->
+    <section id="screenIndicatorForm" class="app-screen flex-1 flex flex-col pb-8">
+      <div class="bg-white px-4 py-3 border-b border-siba-hairline flex items-center justify-between text-xs sticky top-[57px] z-20">
+        <button onclick="goBackToIndicatorsList()" class="text-siba-forest font-semibold flex items-center gap-1 hover:underline">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Regresar</span>
+        </button>
+        <span class="font-bold text-siba-muted text-xs uppercase tracking-wider">Evaluación en Campo</span>
+        <span id="formSavedBadge" class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold hidden">Guardado</span>
+      </div>
+
+      <div class="p-5 flex-1 space-y-5">
+        <!-- Título del Indicador -->
+        <div>
+          <span id="formIndicatorCategory" class="text-[10px] font-bold uppercase tracking-wider text-siba-moss block">Recursos y Alojamiento</span>
+          <h2 id="formIndicatorTitle" class="font-editorial text-2xl font-bold text-siba-forest mt-0.5 leading-snug">
+            Estado de los Comederos
+          </h2>
+        </div>
+
+        <!-- Rúbrica: Opciones de Puntuación -->
+        <div class="space-y-2.5">
+          <label class="block text-xs font-bold text-siba-charcoal uppercase tracking-wider">
+            Selecciona la calificación según rúbrica ICA:
+          </label>
+          <div id="rubricOptionsContainer" class="space-y-2">
+            <!-- Rúbricas inyectadas dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Captura de Evidencia Fotográfica (Cámara Móvil / Galería) -->
+        <div class="bg-white p-4 rounded-2xl border border-siba-hairline space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-siba-forest flex items-center gap-1.5">
+              <i data-lucide="camera" class="w-4 h-4 text-siba-moss"></i>
+              Evidencia Fotográfica:
+            </span>
+            <span class="text-[10px] text-siba-muted">Opcional · Recomendado</span>
+          </div>
+
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoUpload(event)">
+
+          <!-- Preview de foto o botón para tomarla -->
+          <div id="photoPreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-siba-hairline h-48 bg-stone-100">
+            <img id="photoPreviewImg" src="" alt="Evidencia" class="w-full h-full object-cover">
+            <button onclick="removePhoto()" class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1.5 shadow-md hover:bg-red-700">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div id="photoPlaceholder" class="border-2 border-dashed border-stone-200 hover:border-siba-moss rounded-xl p-4 text-center cursor-pointer transition" onclick="document.getElementById('cameraInput').click()">
+            <div class="w-10 h-10 rounded-full bg-siba-parchment text-siba-moss flex items-center justify-center mx-auto mb-1.5">
+              <i data-lucide="camera" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-semibold text-siba-forest block">Tomar Foto con la Cámara</span>
+            <span class="text-[10px] text-siba-muted">o seleccionar imagen de la galería</span>
+          </div>
+        </div>
+
+        <!-- Campo de Observaciones Técnicas -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-siba-charcoal uppercase tracking-wider">
+            Observaciones Técnicas de Campo:
+          </label>
+          <textarea id="indicatorObsInput" rows="3" placeholder="Anota novedades, lote específico, suciedad, desperdicio o fallas mecánicas..." class="w-full p-3 bg-white border border-siba-hairline rounded-xl text-xs focus:border-siba-moss focus:outline-none"></textarea>
+        </div>
+
+        <!-- Botón Guardar Calificación -->
+        <div class="pt-2">
+          <button onclick="saveIndicatorEvaluation()" class="w-full py-4 bg-siba-forest hover:bg-siba-deep active:scale-[0.98] transition text-white font-semibold rounded-2xl shadow-lg shadow-siba-forest/20 flex items-center justify-center gap-2 text-xs">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Guardar Calificación de Indicador</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- PANTALLA 6: RESULTADOS EDITORIALES & ÍNDICE GLOBAL IGBA                 -->
+    <!-- ----------------------------------------------------------------------- -->
+    <section id="screenResults" class="app-screen flex-1 flex flex-col pb-10">
+      <div class="bg-white px-4 py-3 border-b border-siba-hairline flex items-center justify-between text-xs sticky top-[57px] z-20">
+        <button onclick="goToCategoriesHub()" class="text-siba-forest font-semibold flex items-center gap-1 hover:underline">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Regresar</span>
+        </button>
+        <span class="font-bold text-siba-forest text-sm">Dictamen Zootécnico IGBA</span>
+        <button onclick="exportAuditExcel()" class="text-emerald-700 font-semibold flex items-center gap-1 hover:underline">
+          <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
+          <span>Excel</span>
+        </button>
+      </div>
+
+      <div class="p-5 flex-1 space-y-5">
+        
+        <!-- Tarjeta Principal de Puntaje Global IGBA -->
+        <div class="bg-white p-6 rounded-3xl border border-siba-hairline shadow-sm text-center space-y-3 relative overflow-hidden">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-siba-muted block">
+            Índice Global de Bienestar Animal (IGBA)
+          </span>
+          <div>
+            <span id="resultsGlobalScore" class="font-editorial text-5xl font-bold text-siba-forest block leading-none">0.0</span>
+            <span class="text-xs text-siba-muted">sobre 100 puntos posibles</span>
+          </div>
+
+          <div>
+            <span id="resultsLevelBadge" class="inline-block px-3 py-1 rounded-full text-xs font-bold pill-excelente">
+              Excelente (Sobresaliente)
+            </span>
+          </div>
+
+          <div class="pt-3 hairline-t text-left">
+            <span class="text-[10px] uppercase font-bold text-siba-muted block mb-1">Concepto Técnico Oficial:</span>
+            <p id="resultsDictamenText" class="text-xs text-siba-charcoal italic leading-relaxed font-light">
+              Calculando dictamen con base en las resoluciones 136 y 253 de 2020...
+            </p>
+          </div>
+        </div>
+
+        <!-- Desglose por los 3 Pilares -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="bg-white p-3 rounded-2xl border border-siba-hairline text-center">
+            <span class="text-[9px] uppercase font-bold text-siba-muted block">Recursos</span>
+            <span id="resultsRecursosScore" class="font-editorial text-lg font-bold text-siba-forest block mt-0.5">0%</span>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-siba-hairline text-center">
+            <span class="text-[9px] uppercase font-bold text-siba-muted block">Salud</span>
+            <span id="resultsAnimalScore" class="font-editorial text-lg font-bold text-siba-forest block mt-0.5">0%</span>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-siba-hairline text-center">
+            <span class="text-[9px] uppercase font-bold text-siba-muted block">Gestión</span>
+            <span id="resultsGestionScore" class="font-editorial text-lg font-bold text-siba-forest block mt-0.5">0%</span>
+          </div>
+        </div>
+
+        <!-- Botones de Acción: Sincronizar con Supabase -->
+        <div class="space-y-2.5 pt-2">
+          <button onclick="syncWithSupabase(true)" class="w-full py-4 bg-siba-forest hover:bg-siba-deep active:scale-[0.98] transition text-white font-semibold rounded-2xl shadow-lg shadow-siba-forest/20 flex items-center justify-center gap-2 text-xs">
+            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+            <span>Sincronizar Evaluación Completa con Supabase</span>
+          </button>
+
+          <button onclick="exportAuditExcel()" class="w-full py-3 bg-white hover:bg-stone-50 active:scale-[0.98] transition text-siba-forest border border-siba-forest/30 font-semibold rounded-2xl flex items-center justify-center gap-2 text-xs">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-700"></i>
+            <span>Descargar Ficha Técnica en Excel (.xlsx)</span>
+          </button>
+
+          <button onclick="resetEvaluation()" class="w-full py-2.5 text-stone-400 hover:text-siba-terracotta text-xs font-semibold">
+            Reiniciar evaluación de esta especie
+          </button>
+        </div>
+
+        <!-- Desglose de Indicadores Evaluados -->
+        <div class="space-y-2 pt-3">
+          <span class="text-xs font-bold text-siba-charcoal uppercase tracking-wider block">
+            Resumen de Indicadores Calificados:
+          </span>
+          <div id="resultsIndicatorsSummary" class="space-y-2 text-xs">
+            <!-- Resumen dinámico -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- DRAWER LATERAL (MENÚ HAMBURGUESA IDÉNTICO A FLUTTER)                   -->
+    <!-- ----------------------------------------------------------------------- -->
+    <div id="drawerOverlay" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden transition-opacity" onclick="toggleDrawer(false)">
+      <div id="drawerContent" class="w-72 max-w-[80%] h-full bg-siba-parchment flex flex-col justify-between shadow-2xl transform -translate-x-full transition-transform duration-200" onclick="event.stopPropagation()">
+        
+        <div>
+          <!-- Header del Drawer -->
+          <div class="bg-siba-forest p-5 text-white space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white/10 p-1.5 flex items-center justify-center border border-white/20">
+                <img src="assets/icono.png" alt="SIBA" class="w-full h-full object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2830/2830305.png'">
+              </div>
+              <div>
+                <h3 class="font-editorial text-lg font-bold leading-none">SIBA</h3>
+                <span class="text-[10px] uppercase tracking-wider text-siba-sage font-medium">Bienestar Animal</span>
+              </div>
+            </div>
+            <div class="pt-1">
+              <span id="drawerSpeciesTag" class="text-[10px] bg-white/15 px-2.5 py-0.5 rounded-full font-medium text-stone-200">
+                Módulo Porcinos · Res. 136/2020
+              </span>
+            </div>
+          </div>
+
+          <!-- Opciones de Navegación -->
+          <nav class="p-3 space-y-1 text-xs font-medium text-siba-charcoal">
+            <button onclick="goToCategoryFromDrawer('recursos')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition">
+              <i data-lucide="home" class="w-4 h-4 text-siba-forest"></i>
+              <span>Recursos y Alojamiento</span>
+            </button>
+            <button onclick="goToCategoryFromDrawer('animal')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition">
+              <i data-lucide="heart-pulse" class="w-4 h-4 text-siba-moss"></i>
+              <span>Salud y Condición Animal</span>
+            </button>
+            <button onclick="goToCategoryFromDrawer('gestion')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition">
+              <i data-lucide="shield-check" class="w-4 h-4 text-siba-forest"></i>
+              <span>Gestión y Bioseguridad</span>
+            </button>
+            <button onclick="openResultsScreen(); toggleDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition">
+              <i data-lucide="award" class="w-4 h-4 text-siba-moss"></i>
+              <span>Resultados e Índices</span>
+            </button>
+
+            <div class="my-2 hairline-b border-stone-200"></div>
+
+            <button onclick="syncWithSupabase(true); toggleDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition">
+              <i data-lucide="cloud-upload" class="w-4 h-4 text-siba-forest"></i>
+              <span>Sincronizar con Nube (Supabase)</span>
+            </button>
+
+            <button onclick="openNormativaModal(); toggleDrawer(false);" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition">
+              <i data-lucide="book-open" class="w-4 h-4 text-siba-terracotta"></i>
+              <span>Documentos Oficiales ICA / MADR</span>
+            </button>
+
+            <a href="index.html" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-stone-200/70 transition text-siba-forest font-semibold">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+              <span>Panel Web Administrador</span>
+            </a>
+
+            <button onclick="confirmLogout();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 text-siba-terracotta font-semibold transition">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+              <span>Cambiar Evaluador / Salir</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="p-4 border-t border-siba-hairline text-center text-[10px] text-siba-muted">
+          UFPSO · GRIITEM · 2026
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMACIÓN DE CIERRE DE SESIÓN -->
+    <div id="logoutModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-xl border border-siba-hairline">
+        <div class="flex items-center gap-2 text-siba-terracotta font-bold text-sm">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          <span>¿Seguro que quieres salir?</span>
+        </div>
+        <p class="text-xs text-siba-charcoal leading-relaxed font-light">
+          Regresarás a la pantalla inicial para cambiar el nombre o código del evaluador.
+        </p>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button onclick="document.getElementById('logoutModal').classList.add('hidden')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-100">
+            Cancelar
+          </button>
+          <button onclick="performLogout()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-siba-terracotta text-white hover:bg-red-700">
+            Sí, salir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE NORMATIVA OFICIAL -->
+    <div id="normativaModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3.5 shadow-xl border border-siba-hairline max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center justify-between">
+          <h3 class="font-editorial text-lg font-bold text-siba-forest">Normativa Oficial ICA / MADR</h3>
+          <button onclick="document.getElementById('normativaModal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600">✕</button>
+        </div>
+        <div class="space-y-2 text-xs">
+          <a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000136%20de%202020.pdf" target="_blank" class="block p-2.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline">
+            <span class="font-bold text-siba-forest block">🐷 Res. 136 de 2020 (Porcinos)</span>
+            <span class="text-[10px] text-siba-muted">Manual bienestar animal MinAgricultura</span>
+          </a>
+          <a href="https://www.ica.gov.co/noticias/ica-metodologia-evaluacion-bienestar-porcino" target="_blank" class="block p-2.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline">
+            <span class="font-bold text-siba-forest block">📋 Metodología EBA Porcinos 3.0</span>
+            <span class="text-[10px] text-siba-muted">Protocolo de rúbricas oficial ICA</span>
+          </a>
+          <a href="https://www.minagricultura.gov.co/Normatividad/Resoluciones/Resoluci%C3%B3n%20No.%20000253%20de%202020.pdf" target="_blank" class="block p-2.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline">
+            <span class="font-bold text-siba-forest block">🐔 Res. 253 de 2020 (Aves)</span>
+            <span class="text-[10px] text-siba-muted">Directrices para gallinas ponedoras</span>
+          </a>
+          <a href="https://fenavi.org/wp-content/uploads/2021/03/Cartilla-Bienestar-Animal-Aves-Postura.pdf" target="_blank" class="block p-2.5 bg-stone-50 hover:bg-siba-parchment rounded-xl border border-siba-hairline">
+            <span class="font-bold text-siba-forest block">🥚 Cartilla Fenavi & ICA</span>
+            <span class="text-[10px] text-siba-muted">Nidos, bebederos y ventilación</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICACIÓN FLOTANTE -->
+    <div id="appToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-siba-deep text-white text-xs px-4 py-3 rounded-2xl shadow-2xl border border-siba-moss flex items-center gap-2.5 pointer-events-none transition-all duration-300 opacity-0 translate-y-8 z-50 max-w-[90%]">
+      <span id="toastIcon">✅</span>
+      <span id="toastMsg">Acción completada con éxito.</span>
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: LÓGICA COMPLETA DE EVALUACIÓN OFFLINE-FIRST Y SUPABASE        -->
+  <!-- ========================================================================= -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. BANCO COMPLETO DE INDICADORES Y RÚBRICAS (RES. 136 Y 253)
+    // -------------------------------------------------------------------------
+    const PORCINO_INDICATORS = {
+      recursos: [
+        'Estado de los Comederos',
+        'Acceso al Agua (flujo)',
+        'Estado de limpieza de los bebederos',
+        'Altura de los bebederos',
+        'Número de bebederos por animal',
+        'Protección ante condiciones ambientales',
+        'Ventilación',
+        'Iluminación',
+        'Superficie de descanso',
+        'Resguardo para lechones',
+        'Espacio disponible para cerdas',
+        'Jaulas de libre acceso y/o muros de ocultación para cerdas en corrales',
+        'Jaulas adecuadas al tamaño de la cerda',
+        'Espacio disponible para verracos',
+        'Espacio disponible para precebo, ceba y reemplazos',
+        'Inspección de los animales',
+        'Instalaciones y elementos para manejo',
+        'Material de enriquecimiento'
+      ],
+      animal: [
+        'Condición Corporal',
+        'Heces sobre el cuerpo',
+        'Jadeo y/o Temblores',
+        'Amontonamiento',
+        'Heridas en el cuerpo',
+        'Uso de material de enriquecimiento',
+        'Relación Humano–Animal'
+      ],
+      gestion: [
+        'Identificación de animales',
+        'Dietas balanceadas con registro ICA',
+        'Alimentaciones adaptadas a necesidades fisiológicas',
+        'Ayuno antes del transporte',
+        'Plan de contingencia para falta de agua y alimento',
+        'Plan para desastres naturales',
+        'Plan Sanitario (Prevención, Diagnóstico)',
+        'Programas oficiales del ICA',
+        'Enfermedades de declaración obligatoria',
+        'Tratamiento de animales enfermos',
+        'Buenas prácticas de uso de medicamentos',
+        'Registro de Mortalidad - Lechones',
+        'Registro de Mortalidad - Hembras de cría',
+        'Registro de Mortalidad - Precebos y Ceba',
+        'Procedimiento de manejo de los animales',
+        'Prácticas dolorosas – descolmille y/o limado de colmillos',
+        'Prácticas dolorosas – descole',
+        'Castración inmunológica y/o castración quirúrgica',
+        'Intervenciones quirúrgicas por personal adecuado',
+        'Capacitación del personal que realiza sacrificio humanitario o eutanasia',
+        'Procedimiento para el sacrificio humanitario',
+        'Capacitación del personal en manejo de cerdos, reproducción, salud y bienestar animal'
+      ]
+    };
+
+    const AVES_INDICATORS = {
+      recursos: [
+        'Estado e integridad de las jaulas/nidales',
+        'Calidad de los comederos',
+        'Acceso y funcionamiento de bebederos',
+        'Calidad de la cama',
+        'Confort térmico (ventiladores/cortinas)',
+        'Iluminación (fotoperiodo)',
+        'Densidad de población',
+        'Calidad del agua de bebida',
+        'Limpieza y desinfección de instalaciones'
+      ],
+      animal: [
+        'Estado y limpieza del plumaje',
+        'Condición corporal',
+        'Presencia de jadeo',
+        'Amontonamiento',
+        'Lesiones cutáneas (picoteo/heridas)',
+        'Deformidad del hueso de la quilla',
+        'Pododermatitis',
+        'Estado de los ojos y fosas nasales',
+        'Integridad del pico'
+      ],
+      gestion: [
+        'Registros de mortalidad',
+        'Plan sanitario (vacunación/desparasitación)',
+        'Plan de contingencia',
+        'Procedimiento de eutanasia / sacrificio humanitario',
+        'Capacitación del personal',
+        'Registro de tratamientos veterinarios y tiempo de retiro',
+        'Ayuno pre-transporte'
+      ]
+    };
+
+    // Rúbricas específicas de puntuación
+    const PORCINO_RUBRICS = {
+      'Estado de los Comederos': {
+        100: 'Todos los comederos limpios y sin riesgo de contaminación.',
+        55: 'Más del 50% limpios y sin riesgo.',
+        0: 'Hasta el 50% limpios y/o con riesgo de fermentación.'
+      },
+      'Acceso al Agua (flujo)': {
+        100: 'Cumple el 100% de los bebederos (>1.5 L/min).',
+        55: 'Cumple entre 75% y menos del 100%.',
+        20: 'Cumple entre más del 50% y menos del 75%.',
+        0: 'Cumple hasta el 50%.'
+      },
+      'Estado de limpieza de los bebederos': {
+        100: 'Todos limpios sin sarro ni heces.',
+        55: 'Hasta el 25% sucios.',
+        20: 'Más del 25% y hasta el 50% sucios.',
+        0: 'Más del 50% sucios.'
+      },
+      'Ventilación': {
+        100: 'Ventilación correcta en todos los sitios evaluados.',
+        55: 'Hasta 10% de sitios evaluados con ventilación incorrecta.',
+        20: 'Mayor de 10% hasta 25% con ventilación incorrecta.',
+        0: 'Más del 25% con ventilación deficiente / olor fuerte.'
+      },
+      'Condición Corporal': {
+        100: '<10% con condición 2 y <10% con condición 1.',
+        55: '10–20% con condición 2 y 10–15% con condición 1.',
+        20: '10–20% con condición 2 y 15–20% con condición 1.',
+        0: '>20% con condición 1 y/o >20% con condición 2.'
+      },
+      'Jadeo y/o Temblores': {
+        100: '0% de animales con jadeos o temblores.',
+        55: '≤8% de animales afectados.',
+        0: '>8% de animales con estrés térmico.'
+      },
+      'Plan Sanitario (Prevención, Diagnóstico)': {
+        100: 'Plan sanitario documentado, actualizado y elaborado por MV/MVZ.',
+        0: 'No se cuenta con plan sanitario documentado o vigente.'
+      }
+    };
+
+    const AVES_RUBRICS = {
+      'Estado e integridad de las jaulas/nidales': {
+        100: 'Todas las jaulas y nidales limpios, en buen estado, sin alambres salientes.',
+        55: 'Más del 80% de las jaulas/nidales en buen estado.',
+        20: 'Entre 50% y 80% en buen estado.',
+        0: 'Menos del 50% en buen estado o riesgos de atrapamiento.'
+      },
+      'Calidad de la cama': {
+        100: 'Cama suelta, seca, limpia y con profundidad adecuada.',
+        55: 'Cama con ligera humedad en menos del 20% del área.',
+        20: 'Cama apelmazada o húmeda en 20% a 50% del área.',
+        0: 'Cama totalmente apelmazada o húmeda en >50%.'
+      },
+      'Estado y limpieza del plumaje': {
+        100: 'Plumaje limpio, completo y sin parásitos en >90% del lote.',
+        55: 'Pérdida moderada de plumaje en 10-25% del lote.',
+        20: 'Pérdida severa en 25-50% del lote.',
+        0: 'Más del 50% del lote con plumaje deficiente o parásitos.'
+      },
+      'Presencia de jadeo': {
+        100: '0% de aves con signos de jadeo.',
+        55: 'Menos del 10% de aves jadeando.',
+        0: 'Más del 10% de aves con estrés térmico severo.'
+      }
+    };
+
+    // -------------------------------------------------------------------------
+    // 2. ESTADO GLOBAL DE LA APLICACIÓN MÓVIL
+    // -------------------------------------------------------------------------
+    let currentSpecies = 'Porcinos'; // 'Porcinos' o 'Aves de Postura'
+    let currentCategory = 'recursos';
+    let currentIndicatorName = '';
+    let currentEvaluations = {};     // { [species_category_name]: { puntos, foto, obs, ts } }
+    let selectedFormScore = null;
+    let selectedFormPhoto = '';
+
+    const SUPABASE_URL = "https://ktbgvnfwtsezzxaoirju.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Ymd2bmZ3dHNlenp4YW9pcmp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NTEzMzkzNSwiZXhwIjoyMTEwNzA5OTM1fQ.uxq6V7bTbqV7y9Hp7ysg2Z1NTc22aTGcZSoe7_8zuAo";
+
+    // -------------------------------------------------------------------------
+    // 3. INICIALIZACIÓN
+    // -------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadEvaluationsFromStorage();
+      checkSavedUser();
+      setupNetworkListener();
+      checkIosPwaPrompt();
+
+      // Service Worker registration
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+    });
+
+    function checkIosPwaPrompt() {
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      if (isIos && !isStandalone) {
+        document.getElementById('iosInstallBanner').classList.remove('hidden');
+      }
+    }
+
+    function setupNetworkListener() {
+      const updateNet = () => {
+        const dot = document.getElementById('netStatusIcon');
+        if (navigator.onLine) {
+          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+          dot.title = "En línea (Internet OK)";
+        } else {
+          dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+          dot.title = "Modo fuera de línea (Guardando en SQLite/LocalStorage)";
+          showToast("📴 Modo sin conexión activo. Datos resguardados localmente.", "info");
+        }
+      };
+      window.addEventListener('online', () => {
+        updateNet();
+        showToast("📶 Conexión restaurada. Sincronizando con Supabase...", "ok");
+        syncWithSupabase(false);
+      });
+      window.addEventListener('offline', updateNet);
+      updateNet();
+    }
+
+    function checkSavedUser() {
+      const user = JSON.parse(localStorage.getItem('siba_user') || 'null');
+      const now = new Date().toISOString().slice(0, 10);
+      document.getElementById('loginDate').value = now;
+
+      if (user && user.name) {
+        document.getElementById('loginName').value = user.name;
+        document.getElementById('loginCode').value = user.code || '';
+        showScreen('screenSpecies');
+        updateUserHeader(user.name, user.date || now);
+      } else {
+        showScreen('screenLogin');
+      }
+    }
+
+    function selectQuickUser(name, code) {
+      document.getElementById('loginName').value = name;
+      document.getElementById('loginCode').value = code;
+    }
+
+    function saveAndEnterApp() {
+      const name = document.getElementById('loginName').value.trim();
+      const code = document.getElementById('loginCode').value.trim() || '0192546';
+      const date = document.getElementById('loginDate').value || new Date().toISOString().slice(0, 10);
+
+      if (!name) {
+        showToast("Por favor digita el nombre del evaluador", "err");
+        return;
+      }
+
+      const user = { name, code, date };
+      localStorage.setItem('siba_user', JSON.stringify(user));
+      updateUserHeader(name, date);
+      showScreen('screenSpecies');
+      showToast(`Bienvenido ${name}`, "ok");
+    }
+
+    function updateUserHeader(name, date) {
+      document.getElementById('speciesActiveEvaluator').innerText = name;
+      document.getElementById('speciesActiveDate').innerText = date;
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+
+      // Título en AppBar
+      const titleMap = {
+        screenLogin: 'Identificación',
+        screenSpecies: 'Línea de Producción',
+        screenCategories: currentSpecies,
+        screenIndicatorsList: currentCategoryTitle(),
+        screenIndicatorForm: 'Calificar Indicador',
+        screenResults: 'Resultados IGBA'
+      };
+      document.getElementById('appBarTitle').innerText = titleMap[screenId] || 'SIBA Móvil';
+      window.scrollTo(0, 0);
+      lucide.createIcons();
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. NAVEGACIÓN Y SELECCIÓN DE ESPECIE
+    // -------------------------------------------------------------------------
+    function selectSpecies(species) {
+      currentSpecies = species;
+      document.getElementById('drawerSpeciesTag').innerText = `Módulo ${species}`;
+      document.getElementById('categorySpeciesTitle').innerText = `${species} · ${species.includes('Porc') ? 'Res. 136' : 'Res. 253'}`;
+      updateCategoryProgressBadges();
+      showScreen('screenCategories');
+    }
+
+    function goToSpeciesSelection() {
+      showScreen('screenSpecies');
+    }
+
+    function goToCategoriesHub() {
+      updateCategoryProgressBadges();
+      showScreen('screenCategories');
+    }
+
+    function currentCategoryTitle() {
+      if (currentCategory === 'recursos') return 'Recursos y Alojamiento';
+      if (currentCategory === 'animal') return 'Salud y Condición Animal';
+      return 'Gestión y Bioseguridad';
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. GESTIÓN DE INDICADORES Y PROGRESO
+    // -------------------------------------------------------------------------
+    function getIndicatorsForSpecies(cat) {
+      const isPorc = currentSpecies.toLowerCase().includes('porc');
+      const bank = isPorc ? PORCINO_INDICATORS : AVES_INDICATORS;
+      return bank[cat] || [];
+    }
+
+    function updateCategoryProgressBadges() {
+      const isPorc = currentSpecies.toLowerCase().includes('porc');
+      const bank = isPorc ? PORCINO_INDICATORS : AVES_INDICATORS;
+
+      let totalDone = 0;
+      let totalAll = 0;
+
+      ['recursos', 'animal', 'gestion'].forEach(cat => {
+        const list = bank[cat];
+        totalAll += list.length;
+        let done = 0;
+        list.forEach(ind => {
+          const key = `${currentSpecies}_${cat}_${ind}`;
+          if (currentEvaluations[key] !== undefined) done++;
+        });
+        totalDone += done;
+
+        const badge = document.getElementById(`badgeCat${cat.charAt(0).toUpperCase() + cat.slice(1)}`);
+        if (badge) {
+          badge.innerText = `${done} de ${list.length} evaluados`;
+          badge.className = done === list.length ? "inline-block mt-1 text-[10px] font-bold text-emerald-700" : "inline-block mt-1 text-[10px] font-semibold text-siba-moss";
+        }
+      });
+
+      // Progreso general
+      document.getElementById('overallProgressText').innerText = `${totalDone} de ${totalAll} evaluados`;
+      const pct = totalAll > 0 ? (totalDone / totalAll) * 100 : 0;
+      document.getElementById('overallProgressBar').style.width = `${pct}%`;
+
+      // Contador badge pendiente
+      const pendingCount = Object.keys(currentEvaluations).length;
+      const b = document.getElementById('pendingBadge');
+      if (pendingCount > 0) {
+        b.innerText = pendingCount;
+        b.classList.remove('hidden');
+      } else {
+        b.classList.add('hidden');
+      }
+    }
+
+    function openCategory(cat) {
+      currentCategory = cat;
+      document.getElementById('indicatorListCatTitle').innerText = currentCategoryTitle();
+      renderIndicatorsList();
+      showScreen('screenIndicatorsList');
+    }
+
+    function renderIndicatorsList() {
+      const container = document.getElementById('indicatorsContainer');
+      container.innerHTML = '';
+      const list = getIndicatorsForSpecies(currentCategory);
+
+      let done = 0;
+      list.forEach((name, idx) => {
+        const key = `${currentSpecies}_${currentCategory}_${name}`;
+        const evalData = currentEvaluations[key];
+        const isDone = evalData !== undefined;
+        if (isDone) done++;
+
+        const card = document.createElement('div');
+        card.className = "bg-white p-3.5 rounded-2xl border border-siba-hairline shadow-sm flex items-center justify-between active:scale-[0.98] transition cursor-pointer";
+        card.onclick = () => openIndicatorForm(name);
+
+        const scoreBadge = isDone
+          ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${evalData.puntos >= 80 ? 'bg-emerald-100 text-emerald-800' : (evalData.puntos >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
+               ${evalData.puntos} pts
+             </span>`
+          : `<span class="text-[10px] font-medium text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">Pendiente</span>`;
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3 flex-1 pr-2">
+            <span class="w-6 h-6 rounded-lg bg-siba-parchment text-siba-forest text-xs font-mono font-bold flex items-center justify-center flex-shrink-0">
+              ${idx + 1}
+            </span>
+            <div class="truncate">
+              <h5 class="font-semibold text-siba-forest text-xs truncate">${name}</h5>
+              ${evalData && evalData.foto ? '<span class="text-[9px] text-emerald-600 font-semibold flex items-center gap-0.5 mt-0.5">📷 Con foto</span>' : ''}
+            </div>
+          </div>
+          <div>${scoreBadge}</div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('indicatorListProgress').innerText = `${done}/${list.length}`;
+      lucide.createIcons();
+    }
+
+    function goBackToIndicatorsList() {
+      renderIndicatorsList();
+      showScreen('screenIndicatorsList');
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. FORMULARIO DETALLADO DEL INDICADOR
+    // -------------------------------------------------------------------------
+    function openIndicatorForm(indicatorName) {
+      currentIndicatorName = indicatorName;
+      document.getElementById('formIndicatorCategory').innerText = `${currentSpecies} · ${currentCategoryTitle()}`;
+      document.getElementById('formIndicatorTitle').innerText = indicatorName;
+
+      const key = `${currentSpecies}_${currentCategory}_${indicatorName}`;
+      const saved = currentEvaluations[key];
+
+      selectedFormScore = saved ? saved.puntos : null;
+      selectedFormPhoto = saved ? (saved.foto || '') : '';
+      document.getElementById('indicatorObsInput').value = saved ? (saved.obs || '') : '';
+
+      // Mostrar foto si ya existe
+      if (selectedFormPhoto) {
+        document.getElementById('photoPreviewImg').src = selectedFormPhoto;
+        document.getElementById('photoPreviewContainer').classList.remove('hidden');
+        document.getElementById('photoPlaceholder').classList.add('hidden');
+      } else {
+        document.getElementById('photoPreviewContainer').classList.add('hidden');
+        document.getElementById('photoPlaceholder').classList.remove('hidden');
+      }
+
+      document.getElementById('formSavedBadge').classList.toggle('hidden', !saved);
+
+      // Renderizar rúbricas
+      renderRubricOptions(indicatorName);
+      showScreen('screenIndicatorForm');
+    }
+
+    function renderRubricOptions(name) {
+      const container = document.getElementById('rubricOptionsContainer');
+      container.innerHTML = '';
+
+      const isPorc = currentSpecies.toLowerCase().includes('porc');
+      const rubricsBank = isPorc ? PORCINO_RUBRICS : AVES_RUBRICS;
+      const options = rubricsBank[name] || {
+        100: 'Cumple plenamente con los lineamientos técnicos oficiales.',
+        55: 'Cumple parcialmente (más del 50% de conformidad).',
+        0: 'No cumple con las condiciones mínimas normativas.'
+      };
+
+      // Ordenar puntuaciones descendente (100 -> 55 -> 20 -> 0)
+      const scores = Object.keys(options).map(Number).sort((a, b) => b - a);
+
+      scores.forEach(score => {
+        const text = options[score];
+        const isSelected = selectedFormScore === score;
+
+        const row = document.createElement('div');
+        row.className = `p-3.5 rounded-xl border text-xs cursor-pointer transition flex items-start gap-3 ${isSelected ? 'bg-siba-forest/10 border-siba-forest text-siba-forest font-semibold' : 'bg-white border-siba-hairline text-siba-charcoal hover:bg-stone-50'}`;
+        row.onclick = () => {
+          selectedFormScore = score;
+          renderRubricOptions(name);
+        };
+
+        const badgeColor = score >= 80 ? 'bg-emerald-100 text-emerald-800' : (score >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+
+        row.innerHTML = `
+          <div class="mt-0.5">
+            <span class="w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-siba-forest bg-siba-forest' : 'border-stone-300'}">
+              ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-white"></span>' : ''}
+            </span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${score} pts</span>
+            </div>
+            <p class="mt-1 leading-relaxed ${isSelected ? 'font-medium' : 'font-light'}">${text}</p>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        selectedFormPhoto = e.target.result;
+        document.getElementById('photoPreviewImg').src = selectedFormPhoto;
+        document.getElementById('photoPreviewContainer').classList.remove('hidden');
+        document.getElementById('photoPlaceholder').classList.add('hidden');
+        showToast("📷 Foto capturada con éxito", "ok");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePhoto() {
+      selectedFormPhoto = '';
+      document.getElementById('photoPreviewContainer').classList.add('hidden');
+      document.getElementById('photoPlaceholder').classList.remove('hidden');
+      document.getElementById('cameraInput').value = '';
+    }
+
+    function saveIndicatorEvaluation() {
+      if (selectedFormScore === null) {
+        showToast("Selecciona una calificación antes de guardar", "err");
+        return;
+      }
+
+      const key = `${currentSpecies}_${currentCategory}_${currentIndicatorName}`;
+      const obs = document.getElementById('indicatorObsInput').value.trim();
+
+      currentEvaluations[key] = {
+        name: currentIndicatorName,
+        category: currentCategory,
+        species: currentSpecies,
+        puntos: selectedFormScore,
+        score: selectedFormScore,
+        foto: selectedFormPhoto,
+        photo: selectedFormPhoto,
+        obs: obs,
+        observaciones: obs,
+        timestamp: new Date().toISOString()
+      };
+
+      saveEvaluationsToStorage();
+      updateCategoryProgressBadges();
+      showToast("✅ Calificación guardada exitosamente", "ok");
+
+      // Regresar a la lista
+      renderIndicatorsList();
+      showScreen('screenIndicatorsList');
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. RESULTADOS E ÍNDICE GLOBAL DE BIENESTAR ANIMAL (IGBA)
+    // -------------------------------------------------------------------------
+    function openResultsScreen() {
+      calculateAndRenderResults();
+      showScreen('screenResults');
+    }
+
+    function calculateAndRenderResults() {
+      // Filtrar indicadores de la especie activa
+      const currentList = Object.values(currentEvaluations).filter(e => e.species === currentSpecies);
+
+      let sumRecursos = 0, countRecursos = 0;
+      let sumAnimal = 0, countAnimal = 0;
+      let sumGestion = 0, countGestion = 0;
+      let totalSum = 0;
+
+      currentList.forEach(item => {
+        const pts = Number(item.puntos ?? item.score ?? 0);
+        totalSum += pts;
+        if (item.category === 'recursos') { sumRecursos += pts; countRecursos++; }
+        else if (item.category === 'animal') { sumAnimal += pts; countAnimal++; }
+        else if (item.category === 'gestion') { sumGestion += pts; countGestion++; }
+      });
+
+      const avgRecursos = countRecursos > 0 ? (sumRecursos / countRecursos).toFixed(1) : 0;
+      const avgAnimal = countAnimal > 0 ? (sumAnimal / countAnimal).toFixed(1) : 0;
+      const avgGestion = countGestion > 0 ? (sumGestion / countGestion).toFixed(1) : 0;
+      const globalScore = currentList.length > 0 ? (totalSum / currentList.length).toFixed(1) : 0;
+
+      document.getElementById('resultsGlobalScore').innerText = globalScore;
+      document.getElementById('resultsRecursosScore').innerText = `${avgRecursos}%`;
+      document.getElementById('resultsAnimalScore').innerText = `${avgAnimal}%`;
+      document.getElementById('resultsGestionScore').innerText = `${avgGestion}%`;
+
+      // Nivel y semáforo
+      const badge = document.getElementById('resultsLevelBadge');
+      const dictamen = document.getElementById('resultsDictamenText');
+
+      if (globalScore >= 80) {
+        badge.innerText = "Excelente (Cumplimiento Sobresaliente)";
+        badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold pill-excelente";
+        dictamen.innerText = `Nivel Excelente (${globalScore} pts). Cumplimiento sobresaliente de los estándares de bienestar animal según ${currentSpecies.includes('Porc') ? 'Resolución 136 de 2020' : 'Resolución 253 de 2020'}. Óptimo manejo de comederos, bebederos y registros.`;
+      } else if (globalScore >= 60) {
+        badge.innerText = "Bueno (Cumplimiento Aceptable)";
+        badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold pill-bueno";
+        dictamen.innerText = `Nivel Bueno (${globalScore} pts). Cumple con los requerimientos técnicos básicos. Se aconseja reforzar inspección y limpieza preventiva.`;
+      } else if (globalScore >= 40) {
+        badge.innerText = "Regular (Acciones Correctivas)";
+        badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold pill-regular";
+        dictamen.innerText = `Nivel Regular (${globalScore} pts). Incumplimiento parcial de la norma. Requiere plan correctivo inmediato en comederos o ventilación.`;
+      } else {
+        badge.innerText = "Crítico (Alerta Sanitaria)";
+        badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold pill-critico";
+        dictamen.innerText = `Nivel Crítico (${globalScore} pts). ¡ALERTA VETERINARIA INMEDIATA! Condiciones deficientes de alojamiento o estrés animal severo.`;
+      }
+
+      // Resumen desglosado
+      const summaryContainer = document.getElementById('resultsIndicatorsSummary');
+      summaryContainer.innerHTML = '';
+
+      if (currentList.length === 0) {
+        summaryContainer.innerHTML = `<p class="text-xs text-siba-muted italic">Aún no has calificado indicadores para ${currentSpecies}.</p>`;
+        return;
+      }
+
+      currentList.forEach(item => {
+        const row = document.createElement('div');
+        row.className = "p-3 bg-white rounded-xl border border-siba-hairline flex items-center justify-between";
+        row.innerHTML = `
+          <div class="pr-2">
+            <span class="font-semibold text-siba-forest block">${item.name}</span>
+            <span class="text-[10px] uppercase font-bold text-siba-muted">${item.category}</span>
+            ${item.obs ? `<p class="text-[11px] text-siba-charcoal italic mt-0.5">"${item.obs}"</p>` : ''}
+          </div>
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${item.puntos >= 80 ? 'bg-emerald-100 text-emerald-800' : (item.puntos >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
+            ${item.puntos} pts
+          </span>
+        `;
+        summaryContainer.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    function resetEvaluation() {
+      if (!confirm(`¿Estás seguro de reiniciar la evaluación de ${currentSpecies}? Se borrarán los puntajes de esta especie en el celular.`)) return;
+      Object.keys(currentEvaluations).forEach(k => {
+        if (k.startsWith(currentSpecies)) delete currentEvaluations[k];
+      });
+      saveEvaluationsToStorage();
+      updateCategoryProgressBadges();
+      openResultsScreen();
+      showToast("Evaluación reiniciada", "info");
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. SINCRONIZACIÓN CON SUPABASE CLOUD
+    // -------------------------------------------------------------------------
+    async function syncWithSupabase(interactive = true) {
+      const currentList = Object.values(currentEvaluations).filter(e => e.species === currentSpecies);
+
+      if (currentList.length === 0) {
+        if (interactive) showToast("No hay indicadores calificados para sincronizar.", "info");
+        return;
+      }
+
+      if (!navigator.onLine) {
+        if (interactive) showToast("📴 Sin conexión. Los datos están guardados en el celular.", "info");
+        return;
+      }
+
+      if (interactive) showToast("☁ Sincronizando evaluación con Supabase...", "info");
+
+      try {
+        const user = JSON.parse(localStorage.getItem('siba_user') || '{}');
+        const now = new Date();
+        const auditId = `AUD-UFPSO-${now.getTime().toString().slice(-7)}`;
+
+        const totalSum = currentList.reduce((acc, c) => acc + Number(c.puntos || 0), 0);
+        const globalScore = Number((totalSum / currentList.length).toFixed(1));
+
+        let sumRec = 0, countRec = 0;
+        let sumAnim = 0, countAnim = 0;
+        let sumGest = 0, countGest = 0;
+        currentList.forEach(i => {
+          const p = Number(i.puntos || 0);
+          if (i.category === 'recursos') { sumRec += p; countRec++; }
+          else if (i.category === 'animal') { sumAnim += p; countAnim++; }
+          else if (i.category === 'gestion') { sumGest += p; countGest++; }
+        });
+
+        const scoreRecursos = countRec > 0 ? Number((sumRec / countRec).toFixed(1)) : globalScore;
+        const scoreAnimal = countAnim > 0 ? Number((sumAnim / countAnim).toFixed(1)) : globalScore;
+        const scoreGestion = countGest > 0 ? Number((sumGest / countGest).toFixed(1)) : globalScore;
+
+        const level = globalScore >= 80 ? 'Excelente' : (globalScore >= 60 ? 'Bueno' : (globalScore >= 40 ? 'Regular' : 'Crítico'));
+
+        const payload = {
+          id: auditId,
+          evaluador_nombre: user.name || "Evaluador UFPSO",
+          evaluador_codigo: user.code || "0192546",
+          especie: currentSpecies,
+          lote_codigo: `LOTE-${currentSpecies.toUpperCase().slice(0, 4)}-${now.getDate()}${now.getMonth() + 1}`,
+          ubicacion: "Granja Experimental UFPSO",
+          score_recursos: scoreRecursos,
+          score_animal: scoreAnimal,
+          score_gestion: scoreGestion,
+          puntaje_global: globalScore,
+          nivel_bienestar: level,
+          dictamen: `Auditoría integral de ${currentSpecies} evaluada en campo vía SIBA Móvil PWA con ${currentList.length} indicadores.`,
+          indicadores_json: currentList.map(it => ({
+            name: it.name,
+            score: it.puntos,
+            category: it.category,
+            obs: it.obs || '',
+            photo: it.foto || ''
+          })),
+          origen_offline: true
+        };
+
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { error } = await client.from('evaluaciones').insert([payload]);
+
+        if (error) throw error;
+
+        showToast(`✅ ¡Auditoría subida a Supabase! (ID: ${auditId})`, "ok");
+
+        // Alerta sonora sutil / vibración táctil
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+      } catch (err) {
+        console.error("Error sincronizando:", err);
+        showToast(`⚠️ Error al sincronizar: ${err.message || 'Error de red'}`, "err");
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. EXPORTACIÓN A EXCEL (.XLSX)
+    // -------------------------------------------------------------------------
+    function exportAuditExcel() {
+      const currentList = Object.values(currentEvaluations).filter(e => e.species === currentSpecies);
+      if (currentList.length === 0) {
+        showToast("No hay indicadores calificados para exportar", "err");
+        return;
+      }
+
+      const user = JSON.parse(localStorage.getItem('siba_user') || '{}');
+      const now = new Date();
+
+      const data = [
+        ["UNIVERSIDAD FRANCISCO DE PAULA SANTANDER OCAÑA"],
+        ["SISTEMA DE INFORMACIÓN DE BIENESTAR ANIMAL (SIBA)"],
+        [`FICHA TÉCNICA DE AUDITORÍA EN CAMPO — ${currentSpecies.toUpperCase()}`],
+        [],
+        ["Evaluador Responsable", `${user.name || 'Javier Mauricio Serna Osorio'} (${user.code || '0192546'})`],
+        ["Fecha y Hora", now.toLocaleString('es-CO')],
+        ["Especie Pecuaria", currentSpecies],
+        ["Normativa Aplicada", currentSpecies.includes('Porc') ? 'Resolución 136 de 2020' : 'Resolución 253 de 2020'],
+        ["Puntaje Global IGBA", document.getElementById('resultsGlobalScore').innerText],
+        ["Dictamen Técnico", document.getElementById('resultsDictamenText').innerText],
+        [],
+        ["DETALLE DE INDICADORES NORMATIVOS EVALUADOS:"],
+        ["N°", "Categoría", "Nombre del Indicador", "Puntaje (0-100)", "Observaciones Técnicas"]
+      ];
+
+      currentList.forEach((it, idx) => {
+        data.push([idx + 1, it.category, it.name, it.puntos, it.obs || "Sin observaciones"]);
+      });
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      ws['!cols'] = [{ wch: 5 }, { wch: 22 }, { wch: 40 }, { wch: 16 }, { wch: 45 }];
+      XLSX.utils.book_append_sheet(wb, ws, "Ficha SIBA");
+      XLSX.writeFile(wb, `Ficha_SIBA_${currentSpecies}_${now.toISOString().slice(0, 10)}.xlsx`);
+      showToast("📊 Archivo Excel generado y descargado", "ok");
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. PERSISTENCIA LOCAL (OFFLINE-FIRST)
+    // -------------------------------------------------------------------------
+    function saveEvaluationsToStorage() {
+      localStorage.setItem('siba_evaluations_store', JSON.stringify(currentEvaluations));
+    }
+
+    function loadEvaluationsFromStorage() {
+      try {
+        const raw = localStorage.getItem('siba_evaluations_store');
+        if (raw) currentEvaluations = JSON.parse(raw);
+      } catch (e) {
+        currentEvaluations = {};
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. DRAWER Y MODALES
+    // -------------------------------------------------------------------------
+    function toggleDrawer(show) {
+      const overlay = document.getElementById('drawerOverlay');
+      const content = document.getElementById('drawerContent');
+
+      if (show) {
+        overlay.classList.remove('hidden');
+        setTimeout(() => content.classList.remove('-translate-x-full'), 10);
+      } else {
+        content.classList.add('-translate-x-full');
+        setTimeout(() => overlay.classList.add('hidden'), 200);
+      }
+    }
+
+    function goToCategoryFromDrawer(cat) {
+      toggleDrawer(false);
+      openCategory(cat);
+    }
+
+    function openNormativaModal() {
+      document.getElementById('normativaModal').classList.remove('hidden');
+    }
+
+    function confirmLogout() {
+      toggleDrawer(false);
+      document.getElementById('logoutModal').classList.remove('hidden');
+    }
+
+    function performLogout() {
+      document.getElementById('logoutModal').classList.add('hidden');
+      localStorage.removeItem('siba_user');
+      showScreen('screenLogin');
+      showToast("Sesión cerrada", "info");
+    }
+
+    function showToast(msg, type = "ok") {
+      const toast = document.getElementById('appToast');
+      const icon = document.getElementById('toastIcon');
+      const txt = document.getElementById('toastMsg');
+
+      txt.innerText = msg;
+      icon.innerText = type === "ok" ? "✅" : (type === "err" ? "⚠️" : "ℹ️");
+
+      toast.classList.remove('opacity-0', 'translate-y-8');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-8');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
