@@ -1317,19 +1317,87 @@
       });
     }
 
-    function handlePhotoUpload(event) {
+    // -------------------------------------------------------------------------
+    // COMPRESIÓN INTELIGENTE Y SUBIDA A SUPABASE STORAGE BUCKET 'evidencias'
+    // -------------------------------------------------------------------------
+    async function compressImage(file, maxDimension = 1200, quality = 0.75) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDimension || h > maxDimension) {
+              if (w > h) {
+                h = Math.round((h * maxDimension) / w);
+                w = maxDimension;
+              } else {
+                w = Math.round((w * maxDimension) / h);
+                h = maxDimension;
+              }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob((blob) => {
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+              resolve({ blob, dataUrl: compressedDataUrl });
+            }, 'image/jpeg', quality);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadPhotoToSupabase(blob) {
+      try {
+        const fileName = `EVIDENCIA_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${fileName}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'image/jpeg'
+          },
+          body: blob
+        });
+        if (res.ok) {
+          return `${SUPABASE_URL}/storage/v1/object/public/evidencias/${fileName}`;
+        }
+      } catch (e) {
+        console.warn("No se pudo subir a Supabase Storage en vivo (offline):", e);
+      }
+      return null;
+    }
+
+    async function handlePhotoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        selectedFormPhoto = e.target.result;
-        document.getElementById('photoPreviewImg').src = selectedFormPhoto;
-        document.getElementById('photoPreviewContainer').classList.remove('hidden');
-        document.getElementById('photoPlaceholder').classList.add('hidden');
-        showToast("📷 Foto capturada con éxito", "ok");
-      };
-      reader.readAsDataURL(file);
+      showToast("⏳ Procesando y optimizando fotografía...", "info");
+      const { blob, dataUrl } = await compressImage(file);
+
+      // Previsualizar inmediatamente la imagen comprimida
+      selectedFormPhoto = dataUrl;
+      document.getElementById('photoPreviewImg').src = selectedFormPhoto;
+      document.getElementById('photoPreviewContainer').classList.remove('hidden');
+      document.getElementById('photoPlaceholder').classList.add('hidden');
+
+      // Intentar subir a la nube Supabase Storage
+      if (navigator.onLine) {
+        const publicUrl = await uploadPhotoToSupabase(blob);
+        if (publicUrl) {
+          selectedFormPhoto = publicUrl; // Usar URL pública definitiva
+          showToast("☁ Foto optimizada y guardada en Supabase Storage", "ok");
+          return;
+        }
+      }
+
+      showToast("📷 Foto guardada localmente (se subirá al detectar red)", "ok");
     }
 
     function removePhoto() {
@@ -1691,14 +1759,23 @@
 
       selectedAudit.indicators.forEach(ind => {
         const item = document.createElement('div');
-        item.className = "p-3 bg-white rounded-xl border border-siba-hairline flex items-center justify-between";
+        item.className = "p-3 bg-white rounded-xl border border-siba-hairline flex items-center justify-between gap-3";
+        const photoUrl = ind.photo || ind.foto || "";
         item.innerHTML = `
-          <div>
-            <span class="font-semibold text-siba-forest block">${ind.name}</span>
-            <span class="text-[10px] text-siba-muted uppercase">${ind.category}</span>
-            ${ind.obs ? `<p class="text-[11px] text-siba-charcoal italic mt-0.5">"${ind.obs}"</p>` : ''}
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            ${photoUrl ? `
+              <a href="${photoUrl}" target="_blank" title="Ver fotografía de evidencia" class="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-siba-hairline bg-stone-100 hover:opacity-80 transition group relative">
+                <img src="${photoUrl}" alt="Evidencia" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
+                <span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition">Ver</span>
+              </a>
+            ` : ''}
+            <div class="truncate">
+              <span class="font-semibold text-siba-forest block truncate">${ind.name}</span>
+              <span class="text-[10px] text-siba-muted uppercase font-mono">${ind.category}</span>
+              ${ind.obs ? `<p class="text-[11px] text-siba-charcoal italic mt-0.5 truncate">"${ind.obs}"</p>` : ''}
+            </div>
           </div>
-          <span class="text-xs font-bold px-2 py-0.5 rounded-full ${ind.score >= 80 ? 'bg-emerald-100 text-emerald-800' : (ind.score >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full flex-shrink-0 ${ind.score >= 80 ? 'bg-emerald-100 text-emerald-800' : (ind.score >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
             ${ind.score} pts
           </span>
         `;
