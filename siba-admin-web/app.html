@@ -1435,12 +1435,12 @@
           score_gestion: scoreGestion,
           puntaje_global: globalScore,
           nivel_bienestar: level,
-          dictamen: `Auditoría integral de ${currentSpecies} evaluada en campo vía SIBA Móvil PWA con ${currentList.length} indicadores.`,
+          dictamen: document.getElementById('resultsDictamenText')?.innerText?.trim() || `Auditoría integral de ${currentSpecies} evaluada en campo vía SIBA Móvil PWA con ${currentList.length} indicadores.`,
           indicadores_json: currentList.map(it => ({
             name: it.name,
             score: it.puntos,
             category: it.category,
-            obs: it.obs || '',
+            obs: (it.obs || it.observaciones || '').toString().trim(),
             photo: it.foto || ''
           })),
           origen_offline: true
