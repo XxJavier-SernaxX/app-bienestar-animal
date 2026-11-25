@@ -308,18 +308,19 @@ class MenuDrawer extends StatelessWidget {
       ),
     );
 
-    final result = await SupabaseSyncService.instance.syncPendingData();
+    final result = await SupabaseSyncService.instance.syncPendingData(forceAll: true);
 
     if (context.mounted) {
+      final isOk = result['status'] == 'complete' || (result['status'] == 'ok' && (result['synced'] ?? 0) > 0);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: result['status'] == 'complete'
+          backgroundColor: isOk
               ? const Color(0xFF263F30)
               : const Color(0xFFB96E4B),
           content: Text(
-            result['status'] == 'complete'
-                ? '✅ Sincronización exitosa: ${result['synced']} registros subidos.'
-                : '📶 Sin conexión. Registros resguardados en SQLite local.',
+            isOk
+                ? '✅ Sincronización exitosa: ${result['synced']} indicadores en la nube.'
+                : (result['message'] ?? 'Modo fuera de línea. Registros en SQLite.'),
           ),
           duration: const Duration(seconds: 4),
         ),

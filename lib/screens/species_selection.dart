@@ -129,18 +129,19 @@ class _SpeciesSelectionPageState extends State<SpeciesSelectionPage> {
                       duration: Duration(seconds: 1),
                     ),
                   );
-                  final res = await SupabaseSyncService.instance.syncPendingData();
+                  final res = await SupabaseSyncService.instance.syncPendingData(forceAll: true);
                   await _checkPendingSync();
                   if (context.mounted) {
+                    final isOk = res['status'] == 'complete' || (res['status'] == 'ok' && (res['synced'] ?? 0) > 0);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        backgroundColor: res['status'] == 'complete'
+                        backgroundColor: isOk
                             ? const Color(0xFF263F30)
                             : const Color(0xFFB96E4B),
                         content: Text(
-                          res['status'] == 'complete'
-                              ? '✅ Sincronizado: ${res['synced']} registros en la nube.'
-                              : '📶 Sin conexión. Registros resguardados en SQLite local.',
+                          isOk
+                              ? '✅ Sincronizado: ${res['synced']} indicadores en la nube.'
+                              : (res['message'] ?? 'Modo fuera de línea. Registros en SQLite.'),
                         ),
                       ),
                     );

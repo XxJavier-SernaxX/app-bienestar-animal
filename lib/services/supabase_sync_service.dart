@@ -57,7 +57,7 @@ class SupabaseSyncService {
   }
 
   /// Sincroniza todas las respuestas y evaluaciones pendientes con Supabase
-  Future<Map<String, dynamic>> syncPendingData() async {
+  Future<Map<String, dynamic>> syncPendingData({bool forceAll = false}) async {
     if (_isSyncing) {
       return {'status': 'in_progress', 'message': 'Sincronización ya en curso'};
     }
@@ -65,6 +65,7 @@ class SupabaseSyncService {
     _isSyncing = true;
     int syncedCount = 0;
     int errorCount = 0;
+    String lastError = '';
 
     try {
       // 1. Verificar conectividad real
@@ -87,17 +88,25 @@ class SupabaseSyncService {
       final supabaseUrl = prefs.getString('supabase_url') ?? defaultSupabaseUrl;
       final anonKey = prefs.getString('supabase_anon_key') ?? defaultAnonKey;
 
-      // 3. Obtener registros no sincronizados de SQLite
-      final pendingList = await DatabaseHelper.instance.getPendingToSync();
+      // 3. Obtener registros de SQLite
+      List<Map<String, dynamic>> pendingList = forceAll
+          ? await DatabaseHelper.instance.getAllResponses()
+          : await DatabaseHelper.instance.getPendingToSync();
+
       if (pendingList.isEmpty) {
-        debugPrint('✅ [SIBA Sync] No hay registros pendientes por sincronizar.');
-        _isSyncing = false;
-        return {'status': 'ok', 'synced': 0, 'message': 'Todo sincronizado'};
+        // Si no hay con synced=0, intentar con todas las respuestas guardadas
+        pendingList = await DatabaseHelper.instance.getAllResponses();
       }
 
-      debugPrint('🔄 [SIBA Sync] Agrupando ${pendingList.length} indicadores pendientes para consolidar evaluaciones...');
+      if (pendingList.isEmpty) {
+        debugPrint('✅ [SIBA Sync] No hay registros en SQLite para sincronizar.');
+        _isSyncing = false;
+        return {'status': 'ok', 'synced': 0, 'message': 'No hay evaluaciones locales por sincronizar'};
+      }
 
-      // 4. Agrupar indicadores por especie para crear una única auditoría completa por sesión
+      debugPrint('🔄 [SIBA Sync] Agrupando ${pendingList.length} indicadores para consolidar evaluaciones...');
+
+      // 4. Agrupar indicadores por especie para crear una auditoría consolidada
       final Map<String, List<Map<String, dynamic>>> groupedBySpecies = {};
       for (var item in pendingList) {
         final species = (item['species'] ?? 'Porcinos').toString();
@@ -108,20 +117,36 @@ class SupabaseSyncService {
       final uri = Uri.parse('$supabaseUrl/rest/v1/evaluaciones');
 
       final evaluadorNombre = prefs.getString('userName') ?? prefs.getString('user_name') ?? 'Evaluador de Campo';
-      final evaluadorCodigo = prefs.getString('userCode') ?? prefs.getString('user_code') ?? 'UFPSO-001';
+      final evaluadorCodigo = prefs.getString('userCode') ?? prefs.getString('user_code') ?? '0192546';
 
       for (var entry in groupedBySpecies.entries) {
         final speciesName = entry.key;
         final items = entry.value;
 
         try {
-          // Calcular promedio global de los indicadores de esta sesión
+          // Promedio global y desglose por categorías
           double sumScores = 0.0;
+          double recSum = 0; int recCount = 0;
+          double animSum = 0; int animCount = 0;
+          double gestSum = 0; int gestCount = 0;
+
           for (var it in items) {
-            sumScores += (it['score'] as num?)?.toDouble() ?? 0.0;
+            final sc = (it['score'] as num?)?.toDouble() ?? 0.0;
+            sumScores += sc;
+            final cat = (it['category'] ?? it['species'] ?? '').toString().toLowerCase();
+            if (cat.contains('recurso')) {
+              recSum += sc; recCount++;
+            } else if (cat.contains('gestion') || cat.contains('gestión')) {
+              gestSum += sc; gestCount++;
+            } else {
+              animSum += sc; animCount++;
+            }
           }
           final double avgGlobal = items.isNotEmpty ? (sumScores / items.length) : 0.0;
           final double roundedGlobal = (avgGlobal * 10).round() / 10.0;
+          final double scoreRecursos = recCount > 0 ? ((recSum / recCount) * 10).round() / 10.0 : roundedGlobal;
+          final double scoreAnimal = animCount > 0 ? ((animSum / animCount) * 10).round() / 10.0 : roundedGlobal;
+          final double scoreGestion = gestCount > 0 ? ((gestSum / gestCount) * 10).round() / 10.0 : roundedGlobal;
 
           // Subir fotos a Supabase Storage 'evidencias' y construir lista de indicadores
           final List<Map<String, dynamic>> indJsonList = [];
@@ -148,57 +173,74 @@ class SupabaseSyncService {
           final now = DateTime.now();
           final auditId = "AUD-UFPSO-${now.millisecondsSinceEpoch.toString().substring(7)}";
 
-          final payload = jsonEncode({
+          final payloadMap = {
             'id': auditId,
             'evaluador_nombre': evaluadorNombre,
             'evaluador_codigo': evaluadorCodigo,
             'especie': speciesName,
             'lote_codigo': 'LOTE-GRANJA-$speciesName',
             'ubicacion': 'Granja Experimental UFPSO',
+            'score_recursos': scoreRecursos,
+            'score_animal': scoreAnimal,
+            'score_gestion': scoreGestion,
             'puntaje_global': roundedGlobal,
             'nivel_bienestar': _calcularNivel(roundedGlobal),
-            'dictamen': 'Auditoría integral de $speciesName consolidada con ${items.length} indicadores evaluados.',
+            'dictamen': 'Nivel ${_calcularNivel(roundedGlobal)} ($roundedGlobal pts). Auditoría integral de $speciesName realizada en campo vía APK SIBA con ${items.length} indicadores evaluados.',
             'indicadores_json': indJsonList,
             'origen_offline': true
-          });
+          };
+
+          final payloadBytes = utf8.encode(jsonEncode(payloadMap));
 
           final request = await client.postUrl(uri);
-          request.headers.set('Content-Type', 'application/json');
+          request.headers.set('Content-Type', 'application/json; charset=utf-8');
           request.headers.set('apikey', anonKey);
           request.headers.set('Authorization', 'Bearer $anonKey');
           request.headers.set('Prefer', 'return=minimal');
-          request.write(payload);
+          request.contentLength = payloadBytes.length;
+          request.add(payloadBytes);
 
           final response = await request.close();
+          final responseBody = await response.transform(utf8.decoder).join();
 
           if (response.statusCode >= 200 && response.statusCode < 300) {
-            // Marcar todos los IDs de esta especie como sincronizados en SQLite
             final List<int> rowIds = items.map((it) => it['id'] as int).toList();
             await DatabaseHelper.instance.markMultipleAsSynced(rowIds, auditId);
             syncedCount += items.length;
+            debugPrint('✅ [SIBA Sync] Auditoría $auditId subida exitosamente a Supabase Cloud.');
           } else {
             errorCount += items.length;
-            print('⚠️ [SIBA Sync] Error al subir auditoría grupal $speciesName: Código HTTP ${response.statusCode}');
+            lastError = 'HTTP ${response.statusCode}: $responseBody';
+            debugPrint('⚠️ [SIBA Sync] Error al subir auditoría $speciesName: $lastError');
           }
         } catch (e) {
           errorCount += items.length;
-          print('⚠️ [SIBA Sync] Excepción al consolidar auditoría $speciesName: $e');
+          lastError = e.toString();
+          debugPrint('⚠️ [SIBA Sync] Excepción al consolidar auditoría $speciesName: $e');
         }
       }
 
       client.close();
-      print('🚀 [SIBA Sync] Proceso finalizado. Total indicadores consolidados: $syncedCount');
 
       _isSyncing = false;
-      return {
-        'status': 'complete',
-        'synced': syncedCount,
-        'errors': errorCount,
-        'message': 'Auditoría integral sincronizada exitosamente'
-      };
+      if (syncedCount > 0) {
+        return {
+          'status': 'complete',
+          'synced': syncedCount,
+          'errors': errorCount,
+          'message': '¡Auditoría subida a Supabase exitosamente!'
+        };
+      } else {
+        return {
+          'status': errorCount > 0 ? 'error' : 'ok',
+          'synced': 0,
+          'errors': errorCount,
+          'message': errorCount > 0 ? 'Error al subir a Supabase: $lastError' : 'No había datos pendientes'
+        };
+      }
     } catch (e) {
       _isSyncing = false;
-      print('❌ [SIBA Sync] Error general en sincronización: $e');
+      debugPrint('❌ [SIBA Sync] Error general en sincronización: $e');
       return {'status': 'error', 'message': e.toString()};
     }
   }
@@ -214,6 +256,7 @@ class SupabaseSyncService {
       request.headers.set('Authorization', 'Bearer $key');
       request.headers.set('apikey', key);
       request.headers.set('Content-Type', 'image/jpeg');
+      request.headers.set('x-upsert', 'true');
       request.contentLength = bytes.length;
       request.add(bytes);
       final response = await request.close();
@@ -221,7 +264,8 @@ class SupabaseSyncService {
         debugPrint('☁ [SIBA Sync] Foto subida exitosamente a Supabase Storage: $fileName');
         return '$supabaseUrl/storage/v1/object/public/evidencias/$fileName';
       } else {
-        debugPrint('⚠️ [SIBA Sync] Error al subir foto a Supabase Storage (${response.statusCode})');
+        final err = await response.transform(utf8.decoder).join();
+        debugPrint('⚠️ [SIBA Sync] Error al subir foto (${response.statusCode}): $err');
       }
     } catch (e) {
       debugPrint('⚠️ [SIBA Sync] Excepción al subir foto a Supabase Storage: $e');

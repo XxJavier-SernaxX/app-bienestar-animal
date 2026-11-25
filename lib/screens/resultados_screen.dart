@@ -8,6 +8,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../helpers/database_helper.dart';
+import '../services/supabase_sync_service.dart';
 import 'export_service.dart';
 
 class ResultadosScreen extends StatefulWidget {
@@ -23,11 +24,69 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
   List<Map<String, dynamic>> resultados = [];
   bool _isLoading = true;
   bool _isExporting = false;
+  bool _isSyncing = false;
 
   @override
   void initState() {
     super.initState();
-    _loadResults();
+    _loadResults().then((_) {
+      _syncWithCloud(silent: true);
+    });
+  }
+
+  Future<void> _syncWithCloud({bool silent = false}) async {
+    if (_isSyncing) return;
+    setState(() => _isSyncing = true);
+    if (!silent && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFF263F30),
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('Subiendo auditoría y fotos a Supabase...'),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
+    try {
+      final res = await SupabaseSyncService.instance.syncPendingData(forceAll: true);
+      if (mounted) {
+        final isOk = res['status'] == 'complete' || (res['status'] == 'ok' && (res['synced'] ?? 0) > 0);
+        if (!silent || isOk) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: isOk ? const Color(0xFF263F30) : const Color(0xFFB96E4B),
+              content: Text(
+                isOk
+                    ? '✅ ¡Auditoría subida a Supabase! (${res['synced']} indicadores sincronizados). Ya visible en Vercel.'
+                    : (res['message'] ?? 'Modo fuera de línea. Guardado en SQLite.'),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted && !silent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFB96E4B),
+            content: Text('Error al sincronizar: $e'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
+    }
   }
 
   Future<void> _loadResults() async {
@@ -131,6 +190,17 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Colors.white),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Sincronizar con Supabase Cloud',
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const Icon(Icons.cloud_upload_rounded, color: Colors.white),
+            onPressed: _isSyncing ? null : () => _syncWithCloud(silent: false),
+          ),
           IconButton(
             tooltip: 'Exportar a Excel',
             icon: _isExporting
@@ -406,6 +476,44 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
                         ),
                       );
                     }).toList(),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF263F30),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 3,
+                        ),
+                        icon: _isSyncing
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Icon(Icons.cloud_upload_rounded, size: 22),
+                        label: Text(
+                          _isSyncing
+                              ? "Subiendo auditoría a Supabase..."
+                              : "☁ Sincronizar con Supabase Cloud",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        onPressed: _isSyncing ? null : () => _syncWithCloud(silent: false),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Center(
+                      child: Text(
+                        "Al sincronizar, las notas y fotos quedarán visibles en Vercel.",
+                        style: TextStyle(fontSize: 11, color: Color(0xFF7A8279)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
     );
