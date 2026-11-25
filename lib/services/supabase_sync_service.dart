@@ -123,16 +123,27 @@ class SupabaseSyncService {
           final double avgGlobal = items.isNotEmpty ? (sumScores / items.length) : 0.0;
           final double roundedGlobal = (avgGlobal * 10).round() / 10.0;
 
-          // Convertir la lista de indicadores
-          final List<Map<String, dynamic>> indJsonList = items.map((it) => {
-            'name': it['indicatorTitle'] ?? it['indicatorId'] ?? 'Indicador',
-            'indicatorId': it['indicatorId'],
-            'score': it['score'] ?? 0,
-            'category': it['species'] ?? speciesName,
-            'timestamp': it['timestamp'],
-            'obs': it['observaciones'] ?? '',
-            'photo': it['photo'] ?? ''
-          }).toList();
+          // Subir fotos a Supabase Storage 'evidencias' y construir lista de indicadores
+          final List<Map<String, dynamic>> indJsonList = [];
+          for (var it in items) {
+            String photoVal = (it['photo'] ?? '').toString();
+            if (photoVal.isNotEmpty && !photoVal.startsWith('http')) {
+              final cloudUrl = await _uploadPhotoFileToSupabase(photoVal, supabaseUrl, anonKey);
+              if (cloudUrl != null) {
+                photoVal = cloudUrl;
+              }
+            }
+
+            indJsonList.add({
+              'name': it['indicatorTitle'] ?? it['indicatorId'] ?? 'Indicador',
+              'indicatorId': it['indicatorId'],
+              'score': it['score'] ?? 0,
+              'category': it['species'] ?? speciesName,
+              'timestamp': it['timestamp'],
+              'obs': it['observaciones'] ?? '',
+              'photo': photoVal
+            });
+          }
 
           final now = DateTime.now();
           final auditId = "AUD-UFPSO-${now.millisecondsSinceEpoch.toString().substring(7)}";
@@ -190,6 +201,32 @@ class SupabaseSyncService {
       print('❌ [SIBA Sync] Error general en sincronización: $e');
       return {'status': 'error', 'message': e.toString()};
     }
+  }
+
+  Future<String?> _uploadPhotoFileToSupabase(String localPath, String supabaseUrl, String key) async {
+    try {
+      final file = File(localPath);
+      if (!await file.exists()) return null;
+      final bytes = await file.readAsBytes();
+      final fileName = "EVIDENCIA_APK_${DateTime.now().millisecondsSinceEpoch}_${file.uri.pathSegments.last}";
+      final uploadUri = Uri.parse('$supabaseUrl/storage/v1/object/evidencias/$fileName');
+      final request = await HttpClient().postUrl(uploadUri);
+      request.headers.set('Authorization', 'Bearer $key');
+      request.headers.set('apikey', key);
+      request.headers.set('Content-Type', 'image/jpeg');
+      request.contentLength = bytes.length;
+      request.add(bytes);
+      final response = await request.close();
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('☁ [SIBA Sync] Foto subida exitosamente a Supabase Storage: $fileName');
+        return '$supabaseUrl/storage/v1/object/public/evidencias/$fileName';
+      } else {
+        debugPrint('⚠️ [SIBA Sync] Error al subir foto a Supabase Storage (${response.statusCode})');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [SIBA Sync] Excepción al subir foto a Supabase Storage: $e');
+    }
+    return null;
   }
 
   String _calcularNivel(double score) {

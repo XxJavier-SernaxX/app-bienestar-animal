@@ -824,10 +824,10 @@
     </div>
   </div>
 
-  <!-- TOAST FLOTANTE -->
-  <div id="appToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-siba-deep text-white text-xs px-4 py-3 rounded-2xl shadow-2xl border border-siba-moss flex items-center gap-2.5 pointer-events-none transition-all duration-300 opacity-0 translate-y-8 z-50 max-w-[90%]">
+  <!-- TOAST FLOTANTE CON ALTA VISIBILIDAD EN CELULARES -->
+  <div id="appToast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-siba-deep text-white text-xs px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-siba-sage flex items-center gap-2.5 pointer-events-none transition-all duration-300 opacity-0 translate-y-8 z-[100] max-w-[90%] text-center justify-center">
     <span id="toastIcon">✅</span>
-    <span id="toastMsg">Acción completada.</span>
+    <span id="toastMsg" class="font-semibold">Acción completada.</span>
   </div>
 
   <!-- ========================================================================= -->
@@ -1408,8 +1408,19 @@
     }
 
     function saveIndicatorEvaluation() {
+      // Cerrar teclado virtual si está activo en el celular
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+
       if (selectedFormScore === null) {
-        showToast("Selecciona una calificación antes de guardar", "err");
+        const rubricBox = document.getElementById('rubricOptionsContainer');
+        if (rubricBox) {
+          rubricBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          rubricBox.classList.add('ring-4', 'ring-red-500', 'p-1.5', 'rounded-2xl', 'bg-red-50');
+          setTimeout(() => rubricBox.classList.remove('ring-4', 'ring-red-500', 'p-1.5', 'rounded-2xl', 'bg-red-50'), 2500);
+        }
+        showToast("⚠️ Toca una calificación (100, 55 o 0) antes de guardar", "err");
         return;
       }
 
@@ -1433,6 +1444,7 @@
       updateCategoryProgressBadges();
       showToast("✅ Calificación guardada exitosamente", "ok");
 
+      // Regresar a la lista de indicadores
       renderIndicatorsList();
       showScreen('screenIndicatorsList');
     }
